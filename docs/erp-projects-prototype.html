@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Orbit ERP - Project Management Module (prototype)</title>
+<style>
+:root{--bg:#f4f5fa;--card:#fff;--ink:#0f172a;--ink2:#334155;--mut:#64748b;--line:#e5e7ef;--soft:#f1f3f9;--brand:#4f46e5;--brand2:#7c3aed;--brandsoft:#eef0ff;--ok:#059669;--okbg:#d1fae5;--warn:#b45309;--warnbg:#fef3c7;--bad:#dc2626;--badbg:#fee2e2;--info:#0369a1;--infobg:#e0f2fe;--r:14px;--sh:0 1px 2px rgba(15,23,42,.04),0 4px 16px rgba(15,23,42,.05)}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{font:14px/1.45 Inter,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+aside{background:#0b1020;color:#aeb6cf;padding:18px 12px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;font-weight:700;font-size:16px;padding:6px 10px 18px}
+.logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#6366f1,#a855f7);display:grid;place-items:center}
+.nav-h{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#59627f;padding:14px 12px 6px}
+.nav{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;border:0;background:none;color:inherit;text-align:left;width:100%}
+.nav:hover{background:#151b33;color:#fff}.nav.on{background:linear-gradient(90deg,#4f46e5,#6d5ef0);color:#fff;box-shadow:0 6px 18px rgba(79,70,229,.35)}
+.nav.dis{opacity:.4;cursor:default}.nav.dis:hover{background:none;color:inherit}
+.user{margin-top:auto;display:flex;gap:10px;align-items:center;padding:10px;border-top:1px solid #1b2240;color:#fff}
+main{padding:26px 32px 60px;max-width:1500px;width:100%}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+h1{font-size:24px;margin:0;letter-spacing:-.02em}h2{font-size:16px;margin:0}h3{font-size:14px;margin:0}
+.sub{color:var(--mut);margin-top:3px}.crumb{color:var(--mut);font-size:12.5px;margin-bottom:6px}.crumb a{cursor:pointer;color:var(--brand)}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:600;font-size:13px;white-space:nowrap}
+.btn:hover{border-color:#c7cbe0;background:#fafbff}.btn.pri{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border:0;box-shadow:0 6px 16px rgba(79,70,229,.3)}
+.btn.pri:hover{filter:brightness(1.07)}.btn.sm{padding:5px 9px;font-size:12px;border-radius:8px}.btn.dng{color:var(--bad)}.btn.ghost{border-color:transparent;background:none}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.ib{width:28px;height:28px;display:grid;place-items:center;border-radius:8px;border:0;background:none;cursor:pointer;color:var(--mut)}.ib:hover{background:var(--soft);color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}.pad{padding:18px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px}
+.kpi{padding:16px 18px}.kpi .l{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.05em}.kpi .v{font-size:26px;font-weight:700;margin-top:4px;letter-spacing:-.02em}.kpi .s{font-size:12px;color:var(--mut)}
+.bar{height:8px;border-radius:99px;background:var(--soft);overflow:hidden}.bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--brand2))}
+.bar.ok>i{background:var(--ok)}.bar.warn>i{background:#f59e0b}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600}
+.pill:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.s-Active{background:var(--okbg);color:var(--ok)}.s-Planning{background:var(--infobg);color:var(--info)}.s-At-Risk{background:var(--badbg);color:var(--bad)}.s-On-Hold{background:var(--warnbg);color:var(--warn)}.s-Completed{background:#e8e9f1;color:#475069}.s-Draft{background:#e8e9f1;color:#475069}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:7px;background:var(--soft);color:var(--ink2);font-size:12px}
+.chip.warn{background:var(--warnbg);color:var(--warn)}.chip.link{background:var(--brandsoft);color:var(--brand)}.chip.ok{background:var(--okbg);color:var(--ok)}
+.pr{display:inline-flex;align-items:center;gap:6px;font-size:12.5px}.pr i{width:8px;height:8px;border-radius:2px}
+.pr-Critical i{background:#dc2626}.pr-High i{background:#f97316}.pr-Medium i{background:#3b82f6}.pr-Low i{background:#94a3b8}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.inp,select.inp,textarea.inp{padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;min-width:0;width:100%}
+.inp:focus{outline:2px solid #c7cbf9;border-color:var(--brand)}
+.search{position:relative;flex:1;min-width:220px;max-width:340px}.search svg{position:absolute;left:11px;top:10px;color:var(--mut)}.search .inp{padding-left:33px}
+.tools select.inp{width:auto}
+.seg{display:inline-flex;background:var(--soft);border-radius:10px;padding:3px}.seg button{border:0;background:none;padding:5px 11px;border-radius:8px;cursor:pointer;font-weight:600;font-size:12.5px;color:var(--mut)}.seg button.on{background:#fff;color:var(--ink);box-shadow:var(--sh)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+.pc{padding:18px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:12px}.pc:hover{transform:translateY(-2px);border-color:#c9cdf5;box-shadow:0 10px 28px rgba(79,70,229,.12)}
+.code{font:600 11.5px ui-monospace,Consolas,monospace;color:var(--mut)}
+.row2{display:flex;justify-content:space-between;align-items:center;gap:10px}.mut{color:var(--mut)}.sm{font-size:12.5px}.b{font-weight:600}
+.av{width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font-size:10.5px;font-weight:700;border:2px solid #fff;margin-left:-7px}.avs{display:flex;padding-left:7px}.av.lg{width:40px;height:40px;font-size:14px;margin:0;border:0}
+table.t{width:100%;border-collapse:collapse}.t th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);padding:11px 14px;border-bottom:1px solid var(--line);background:#fafbfe}
+.t td{padding:12px 14px;border-bottom:1px solid var(--line)}.t tr.cl{cursor:pointer}.t tr.cl:hover td{background:#fafbff}.t tr:last-child td{border:0}
+.tile{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#fff;flex:none}.tile.sm{width:24px;height:24px;border-radius:7px}.tile.sm svg{width:13px;height:13px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow:auto}.tab{padding:10px 16px;border:0;background:none;cursor:pointer;font-weight:600;color:var(--mut);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}.tab.on{color:var(--brand);border-color:var(--brand)}
+.cols{display:grid;grid-template-columns:2fr 1fr;gap:18px}@media(max-width:1100px){.cols{grid-template-columns:1fr}}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:10px 12px;font-size:13.5px}.kv dt{color:var(--mut)}.kv dd{margin:0}
+/* tree */
+.tree{overflow:hidden}.th,.row{display:grid;grid-template-columns:minmax(260px,1fr) 150px 118px 210px 92px;align-items:center;gap:8px;padding:0 12px}
+.th{height:38px;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);background:#fafbfe;border-bottom:1px solid var(--line)}
+.row{min-height:46px;border-bottom:1px solid var(--line);position:relative;background:#fff}.row:hover{background:#fafbff}.row:hover .acts{opacity:1}
+.row.d0{background:#f8f9fe}.row.d0 .nm{font-weight:700}
+.row.drop-before:before,.row.drop-after:after{content:"";position:absolute;left:0;right:0;height:3px;background:var(--brand);z-index:2}.row.drop-before:before{top:-1px}.row.drop-after:after{bottom:-2px}
+.row.drop-in{outline:2px dashed var(--brand);outline-offset:-2px;background:var(--brandsoft)}.row.dragging{opacity:.4}
+.tc{display:flex;align-items:center;gap:7px;min-width:0}.nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}.nm:hover{color:var(--brand)}
+.grip{cursor:grab;color:#b4b9cc}.chev{width:20px;height:20px;display:grid;place-items:center;border:0;background:none;cursor:pointer;color:var(--mut);transition:.15s;padding:0}.chev.open{transform:rotate(90deg)}.chev.none{visibility:hidden}
+.lvl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);background:var(--soft);padding:1px 6px;border-radius:5px;flex:none}
+.gantt{position:relative;height:18px;background:var(--soft);border-radius:6px}.gantt i{position:absolute;top:3px;height:12px;border-radius:5px;background:linear-gradient(90deg,var(--brand),#8b7cf6)}
+.gantt i.ms{width:12px!important;height:12px;transform:rotate(45deg);border-radius:2px;background:#f59e0b;top:3px}.gantt i.dv{background:#10b981}.gantt i.dn{opacity:.45}
+.acts{display:flex;opacity:0;transition:.1s;justify-content:flex-end}
+.tbar{display:flex;gap:8px;padding:12px;border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+.tbar .sp{flex:1}
+/* template gallery */
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:18px}
+.tcard{overflow:hidden;display:flex;flex-direction:column}.tcard .hd{padding:18px;color:#fff;position:relative;min-height:112px}
+.tcard .hd h3{font-size:17px;margin-top:10px}.tcard .hd .big{position:absolute;right:-10px;top:-12px;opacity:.16}.tcard .hd .big svg{width:110px;height:110px;stroke-width:1.2}
+.tcard .bd{padding:16px 18px;display:flex;flex-direction:column;gap:12px;flex:1}
+.mini{display:flex;flex-direction:column;gap:5px}.mini div{height:9px;border-radius:5px;background:var(--soft);position:relative}.mini i{position:absolute;top:0;bottom:0;border-radius:5px}
+.stats{display:flex;gap:14px;font-size:12.5px;color:var(--mut);flex-wrap:wrap}.stats b{color:var(--ink)}
+.star{color:#f59e0b}.star svg{fill:#f59e0b}
+.cat-b{padding:6px 13px;border-radius:99px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:600;font-size:12.5px}.cat-b.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+/* wizard */
+.steps{display:flex;gap:0;margin-bottom:22px;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:8px;overflow:auto}
+.step{flex:1;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;color:var(--mut);white-space:nowrap;min-width:140px}
+.step .n{width:26px;height:26px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-weight:700;font-size:12.5px}
+.step.on{background:var(--brandsoft);color:var(--brand)}.step.on .n{background:var(--brand);color:#fff}.step.done .n{background:var(--ok);color:#fff}.step.done{color:var(--ink)}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}@media(max-width:900px){.f2,.f3{grid-template-columns:1fr}}
+label.f{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:12.5px;color:var(--ink2)}label.f.full{grid-column:1/-1}label.f span.h{font-weight:400;color:var(--mut)}
+.opt{padding:22px;border:2px solid var(--line);border-radius:var(--r);cursor:pointer;background:#fff;display:flex;gap:16px;align-items:flex-start}.opt:hover{border-color:#c7cbf9}.opt.on{border-color:var(--brand);background:var(--brandsoft)}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.pk{padding:14px;border:2px solid var(--line);border-radius:12px;cursor:pointer;background:#fff;display:flex;gap:12px;align-items:center}.pk:hover{border-color:#c7cbf9}.pk.on{border-color:var(--brand);background:var(--brandsoft)}
+.foot{display:flex;justify-content:space-between;margin-top:22px}
+.sum{display:flex;gap:18px;flex-wrap:wrap;padding:12px 16px;background:var(--brandsoft);border-radius:12px;margin-bottom:14px;align-items:center;font-size:13px}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(11,16,32,.5);display:grid;place-items:center;z-index:50;padding:20px;backdrop-filter:blur(3px)}
+.md{background:#fff;border-radius:18px;width:min(620px,100%);max-height:90vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.35)}.md.wide{width:min(900px,100%)}
+.mh{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.mb{padding:20px 22px}.mf{padding:14px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
+.deps{max-height:150px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:6px}.deps label{display:flex;gap:8px;padding:4px 6px;border-radius:6px;font-size:13px;cursor:pointer}.deps label:hover{background:var(--soft)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:12px;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.phases{display:flex;gap:10px;flex-wrap:wrap}.ph{flex:1;min-width:150px;padding:12px;border:1px solid var(--line);border-radius:12px}
+.tog{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}.tog:last-child{border:0}
+.empty{padding:50px;text-align:center;color:var(--mut)}
+.proto{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;padding:6px 12px;border-radius:10px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside id="side"></aside>
+  <main id="app"></main>
+</div>
+<div id="layer"></div>
+<script>
+/* ---------- icons ---------- */
+const IC={plus:'<path d="M12 5v14M5 12h14"/>',search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',chev:'<path d="m9 18 6-6-6-6"/>',trash:'<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',edit:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',star:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>',grip:'<path stroke-width="3" d="M9 5h.01M9 12h.01M9 19h.01M15 5h.01M15 12h.01M15 19h.01"/>',check:'<path d="M20 6 9 17l-5-5"/>',x:'<path d="M18 6 6 18M6 6l12 12"/>',code:'<path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/>',building:'<path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9h.01M9 12h.01M9 15h.01M9 18h.01"/>',mega:'<path d="m3 11 18-5v12L3 14zM11.6 16.8a3 3 0 1 1-5.8-1.6"/>',layers:'<path d="m12 2 10 5-10 5L2 7zM2 17l10 5 10-5M2 12l10 5 10-5"/>',home:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10"/>',folder:'<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',link:'<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',box:'<path d="M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>',grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',dollar:'<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>',sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',arrow:'<path d="M19 12H5M12 19l-7-7 7-7"/>',expand:'<path d="m7 15 5 5 5-5M7 9l5-5 5 5"/>',wand:'<path d="m15 4 1 2 2 1-2 1-1 2-1-2-2-1 2-1zM3 21 15 9M5 5l1 1M19 15l1 1"/>',save:'<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8"/>'};
+const ico=(n,c='')=>`<svg class="i ${c}" viewBox="0 0 24 24">${IC[n]||''}</svg>`;
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- helpers ---------- */
+let _id=1;const uid=()=>'n'+(_id++);
+function N(name,off,dur,kids=[],o={}){return{id:uid(),key:o.key||null,name,off,dur,kind:o.kind||'node',res:o.res||'',dep:o.dep||[],kids}}
+const MS=(name,off,key,dep)=>N(name,off,0,[],{kind:'milestone',key,dep});
+const DL=(name,off,dur,res,dep)=>N(name,off,dur,[],{kind:'deliverable',res,dep});
+const C=(name,off,dur,res,kids,o)=>N(name,off,dur,kids||[],Object.assign({res},o||{}));
+function resolveKeys(nodes){const m={};(function w(a){a.forEach(n=>{if(n.key)m[n.key]=n.id;w(n.kids)})})(nodes);(function w(a){a.forEach(n=>{n.dep=n.dep.map(k=>m[k]||k);w(n.kids)})})(nodes);return nodes}
+function clone(nodes){const m={};const c=a=>a.map(n=>{const id=uid();m[n.id]=id;return{...n,id,key:null,dep:[...n.dep],kids:c(n.kids)}});const r=c(nodes);(function w(a){a.forEach(n=>{n.dep=n.dep.map(d=>m[d]||d);w(n.kids)})})(r);return r}
+function find(nodes,id,par=null){for(let i=0;i<nodes.length;i++){const n=nodes[i];if(n.id===id)return{n,arr:nodes,i,par};const r=find(n.kids,id,n);if(r)return r}return null}
+function flat(nodes,d=0,out=[]){nodes.forEach(n=>{out.push({n,d});flat(n.kids,d+1,out)});return out}
+function span(n){if(!n.kids.length)return[n.off,n.off+(n.kind==='milestone'?0:n.dur)];let s=1e9,e=0;n.kids.forEach(k=>{const[a,b]=span(k);s=Math.min(s,a);e=Math.max(e,b)});return[s,e]}
+const total=nodes=>nodes.reduce((m,n)=>Math.max(m,span(n)[1]),0);
+const leaves=a=>flat(a).filter(x=>!x.n.kids.length);
+const dayMs=864e5;
+const addDays=(s,n)=>{const d=new Date(s+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+Math.round(n));return d.toISOString().slice(0,10)};
+const fmt=s=>s?new Date(s+'T00:00:00Z').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'}):'-';
+const money=n=>n>=1e6?'$'+(n/1e6).toFixed(n%1e6?2:0)+'M':n>=1e3?'$'+Math.round(n/1e3)+'K':'$'+n;
+const TODAY='2026-11-20';
+const CATS=['Software','Construction','Marketing','Implementation','Internal'];
+const CAT={Software:['code','#4f46e5,#7c3aed'],Construction:['building','#d97706,#ea580c'],Marketing:['mega','#db2777,#f43f5e'],Implementation:['layers','#0891b2,#2563eb'],Internal:['home','#059669,#0d9488']};
+const catI=c=>(CAT[c]||['folder','#475569,#64748b'])[0],catG=c=>`linear-gradient(135deg,${(CAT[c]||['','#475569,#64748b'])[1]})`;
+const STAT=['Planning','Active','At Risk','On Hold','Completed'],PRIO=['Critical','High','Medium','Low'];
+const sc=s=>'s-'+s.replace(' ','-');
+const LV0=['Phase','Module','Component','Sub-component'];
+
+/* ---------- sample data ---------- */
+const PEOPLE=[['p1','Priya Nair','Project Manager','#6366f1'],['p2','Marcus Webb','Construction Manager','#d97706'],['p3','Lena Fischer','Marketing Lead','#db2777'],['p4','Daniel Okafor','Implementation Lead','#0891b2'],['p5','Sofia Reyes','Operations Manager','#059669'],['p6','Tom Alvarez','Project Manager','#7c3aed'],['p7','Aisha Khan','Backend Engineer','#2563eb'],['p8','Chen Wei','Frontend Engineer','#0d9488'],['p9','Ravi Menon','Business Analyst','#9333ea'],['p10','Julia Novak','QA Engineer','#e11d48'],['p11','Omar Haddad','Solution Architect','#475569'],['p12','Emma Clarke','UX Designer','#f59e0b'],['p13','Ben Carter','Site Engineer','#b45309'],['p14','Nia Brooks','Content Strategist','#be185d'],['p15','Leo Martins','Functional Consultant','#0369a1']].map(a=>({id:a[0],name:a[1],role:a[2],color:a[3]}));
+const person=id=>PEOPLE.find(p=>p.id===id)||{name:'Unassigned',color:'#94a3b8',role:''};
+const ini=n=>n.split(' ').map(x=>x[0]).join('').slice(0,2);
+const avatar=(id,c='')=>{const p=person(id);return`<span class="av ${c}" style="background:${p.color}" title="${esc(p.name)}">${ini(p.name)}</span>`};
+
+const tSoft=resolveKeys([
+ C('Discovery & Planning',0,20,'',[C('Requirements',0,20,'',[C('Business requirements',0,8,'Business Analyst',[C('Stakeholder interviews',0,4,'Business Analyst'),C('Process mapping',4,4,'Business Analyst')]),C('Technical requirements',5,10,'Solution Architect',[C('NFR catalogue',5,5,'Solution Architect'),C('Integration inventory',8,7,'Solution Architect')]),DL('Approved BRD',15,5,'Business Analyst')]),MS('Requirements sign-off',20,'m1')]),
+ C('Design',20,30,'',[C('UX Design',20,28,'',[C('Wireframes',20,12,'UX Designer',[C('Key user flows',20,6,'UX Designer'),C('Design system',26,6,'UX Designer')]),C('Clickable prototype',32,16,'UX Designer')]),C('Architecture',20,20,'',[C('System architecture',20,10,'Solution Architect'),C('Data model',30,10,'Solution Architect')]),DL('Design pack',45,5,'UX Designer'),MS('Design freeze',50,'m2')],{dep:['m1']}),
+ C('Build',50,90,'',[C('Backend Services',50,80,'',[C('Auth & Access',50,25,'Backend Engineer',[C('SSO integration',50,10,'Backend Engineer'),C('Role management',60,15,'Backend Engineer')]),C('Core APIs',70,60,'Backend Engineer',[C('Order service',70,30,'Backend Engineer'),C('Billing service',100,30,'Backend Engineer')])]),C('Web Application',60,70,'',[C('Dashboard',60,30,'Frontend Engineer'),C('Admin console',90,40,'Frontend Engineer')]),C('Integrations',90,45,'',[C('Payment gateway',90,20,'Backend Engineer'),C('ERP connector',110,25,'Backend Engineer')]),MS('Feature complete',140,'m3')],{dep:['m2']}),
+ C('Testing & Release',140,35,'',[C('Quality Assurance',140,25,'',[C('Automated regression',140,15,'QA Engineer'),C('Performance testing',150,8,'QA Engineer'),C('User acceptance',158,7,'Business Analyst')]),C('Release',160,15,'',[C('Deployment pipeline',160,8,'Backend Engineer'),C('Go-live runbook',165,10,'Solution Architect')]),DL('Release notes & docs',165,10,'Business Analyst'),MS('Go-live',175,'m4')],{dep:['m3']})]);
+const tCons=resolveKeys([
+ C('Pre-construction',0,45,'',[C('Approvals & Permits',0,40,'',[C('Building permit',0,30,'Project Engineer'),C('Environmental clearance',10,30,'Project Engineer')]),C('Site Preparation',15,30,'',[C('Topographic survey',15,7,'Surveyor'),C('Mobilisation',22,23,'Site Engineer',[C('Site office',22,8,'Site Engineer'),C('Utilities hook-up',30,15,'Site Engineer')])]),MS('Permits granted',45,'c1')]),
+ C('Structure',45,135,'',[C('Foundation',45,50,'',[C('Excavation',45,15,'Site Engineer'),C('Piling',60,20,'Site Engineer'),C('Raft slab',80,15,'Site Engineer')]),C('Superstructure',95,85,'',[C('Columns & beams',95,50,'Site Engineer'),C('Floor slabs',110,50,'Site Engineer'),C('Masonry',140,40,'Site Engineer')]),MS('Topping out',180,'c2')],{dep:['c1']}),
+ C('MEP Services',180,70,'',[C('Electrical',180,50,'MEP Engineer',[C('Cabling & conduits',180,30,'MEP Engineer'),C('Switchgear',210,20,'MEP Engineer')]),C('Plumbing',185,45,'MEP Engineer'),C('HVAC',195,55,'MEP Engineer')],{dep:['c2']}),
+ C('Finishing & Handover',250,60,'',[C('Interiors',250,40,'Site Engineer'),C('Facade & landscaping',255,35,'Site Engineer'),C('Snagging',290,15,'Quality Inspector'),DL('As-built drawings',295,10,'Project Engineer'),MS('Handover',310,'c3')]) ]);
+const tMkt=resolveKeys([
+ C('Strategy & Research',0,14,'',[C('Audience research',0,8,'Content Strategist'),C('Positioning & messaging',6,8,'Content Strategist'),MS('Strategy approved',14,'k1')]),
+ C('Creative Production',14,28,'',[C('Hero content',14,24,'',[C('Script & storyboard',14,6,'Creative Director'),C('Shoot',20,8,'Videographer'),C('Edit & grade',28,10,'Videographer')]),C('Social asset kit',20,16,'Designer'),C('Landing page',24,14,'Frontend Engineer'),MS('Assets approved',42,'k2')],{dep:['k1']}),
+ C('Launch',42,28,'',[C('Paid media',42,28,'Performance Marketer'),C('Email programme',44,20,'Email Marketer'),C('PR & influencers',42,25,'PR Manager'),MS('Campaign live',44,'k3')],{dep:['k2']}),
+ C('Measurement',70,20,'',[C('Reporting dashboard',70,8,'Data Analyst'),DL('Post-campaign review',80,10,'Content Strategist')])]);
+const tImpl=resolveKeys([
+ C('Discovery',0,15,'',[C('Fit-gap analysis',0,10,'Functional Consultant'),DL('Solution blueprint',8,7,'Solution Architect'),MS('Blueprint sign-off',15,'i1')]),
+ C('Configuration',15,55,'',[C('Finance',15,35,'Functional Consultant',[C('General ledger',15,15,'Functional Consultant'),C('AP / AR',25,25,'Functional Consultant')]),C('Inventory',25,35,'Functional Consultant',[C('Warehouses & bins',25,15,'Functional Consultant'),C('Item master',35,25,'Functional Consultant')]),C('Sales & Distribution',35,35,'Functional Consultant')],{dep:['i1']}),
+ C('Data Migration',40,45,'',[C('Data cleansing',40,20,'Data Analyst'),C('Mock loads',60,15,'Data Analyst'),C('Cutover load',80,5,'Data Analyst')]),
+ C('Training & UAT',70,30,'',[C('End-user training',70,15,'Trainer'),C('UAT cycles',80,20,'Business Analyst'),MS('UAT sign-off',100,'i2')]),
+ C('Go-live & Hypercare',100,50,'',[C('Cutover weekend',100,10,'Functional Consultant'),C('Hypercare support',110,40,'Support Engineer'),MS('Go-live',110,'i3')],{dep:['i2']})]);
+const tInt=resolveKeys([
+ C('Plan',0,10,'',[C('Scope & budget',0,6,'Operations Manager'),C('Stakeholder alignment',3,7,'Operations Manager'),MS('Plan approved',10,'a1')]),
+ C('Execute',10,35,'',[C('Workstream A - Facilities',10,30,'Facilities Lead',[C('Space planning',10,10,'Facilities Lead'),C('Vendor coordination',20,20,'Facilities Lead')]),C('Workstream B - IT & Comms',15,25,'IT Lead'),C('Workstream C - People',15,20,'HR Partner')],{dep:['a1']}),
+ C('Review & Handover',45,15,'',[DL('Lessons-learned report',50,10,'Operations Manager'),MS('Project closed',60,'a2')])]);
+
+const mkT=(id,name,category,desc,nodes,o)=>({id,name,category,desc,nodes,levels:o.levels||LV0,status:'Planning',priority:o.priority||'Medium',budget:o.budget,resources:o.resources,isDefault:!!o.def,uses:o.uses,updated:o.updated});
+let TEMPLATES=[
+ mkT('t1','Software Development','Software','Agile-hybrid delivery from discovery through go-live, with design freeze and release gates.',tSoft,{budget:350000,uses:18,def:true,updated:'12 Nov 2026',resources:[{role:'Project Manager',qty:1},{role:'Business Analyst',qty:1},{role:'Solution Architect',qty:1},{role:'UX Designer',qty:1},{role:'Backend Engineer',qty:3},{role:'Frontend Engineer',qty:2},{role:'QA Engineer',qty:2}]}),
+ mkT('t2','Residential Construction','Construction','Permit-to-handover template with structure, MEP and finishing phases. Work packages replace modules.',tCons,{budget:9500000,uses:6,def:true,updated:'02 Oct 2026',levels:['Phase','Work Package','Component','Activity Group'],priority:'High',resources:[{role:'Construction Manager',qty:1},{role:'Site Engineer',qty:4},{role:'MEP Engineer',qty:2},{role:'Quality Inspector',qty:1}]}),
+ mkT('t3','Marketing Campaign Launch','Marketing','Research, creative production, multi-channel launch and measurement.',tMkt,{budget:80000,uses:11,def:true,updated:'28 Oct 2026',levels:['Stage','Workstream','Asset','Variant'],resources:[{role:'Marketing Lead',qty:1},{role:'Content Strategist',qty:1},{role:'Designer',qty:2},{role:'Performance Marketer',qty:1}]}),
+ mkT('t4','ERP Implementation','Implementation','Fit-gap, configuration by business module, data migration, UAT and hypercare.',tImpl,{budget:900000,uses:4,def:true,updated:'19 Sep 2026',levels:['Stage','Business Module','Process Area','Configuration Item'],priority:'High',resources:[{role:'Implementation Lead',qty:1},{role:'Functional Consultant',qty:4},{role:'Data Analyst',qty:2},{role:'Trainer',qty:1}]}),
+ mkT('t5','Internal Initiative','Internal','Lightweight plan-execute-review structure for internal workstreams.',tInt,{budget:50000,uses:9,def:true,updated:'05 Nov 2026',priority:'Low',levels:['Stage','Workstream','Deliverable Group','Item'],resources:[{role:'Operations Manager',qty:1},{role:'Facilities Lead',qty:1},{role:'IT Lead',qty:1}]})];
+
+let PROJECTS=[];
+function mkP(code,name,tid,client,pm,status,prio,budget,start,prog,desc,team){const t=TEMPLATES.find(x=>x.id===tid);const nodes=clone(t.nodes);return{id:'P'+code,code:'PRJ-2026-'+code,name,tid,category:t.category,client,contact:'',pm,status,priority:prio,budget,start,end:addDays(start,total(nodes)),progress:prog,desc,levels:[...t.levels],resources:t.resources.map(r=>({...r})),nodes,team:team.map(x=>({pid:x[0],role:x[1],alloc:x[2]})),settings:{lock:false,notify:true,autoSched:true}}}
+PROJECTS=[
+ mkP('041','Atlas Billing Platform','t1','Northwind Logistics','p1','Active','High',480000,'2026-08-03',42,'Subscription billing and invoicing platform replacing the legacy in-house system.',[['p7','Backend Engineer',100],['p8','Frontend Engineer',80],['p9','Business Analyst',50],['p11','Solution Architect',40],['p10','QA Engineer',60],['p12','UX Designer',30]]),
+ mkP('038','Harbour View Residences','t2','Meridian Developers','p2','Active','Critical',12400000,'2026-03-02',58,'Twelve-storey residential tower, 96 units, with podium retail and basement parking.',[['p13','Site Engineer',100]]),
+ mkP('047','Aurora Spring Launch','t3','Aurora Cosmetics','p3','Planning','Medium',85000,'2026-12-07',0,'Omni-channel launch of the Spring skincare line across social, email and retail partners.',[['p14','Content Strategist',70]]),
+ mkP('035','Helix ERP Rollout','t4','Helix Manufacturing','p4','At Risk','High',1200000,'2026-06-15',51,'Finance, inventory and sales modules rolled out across three plants.',[['p15','Functional Consultant',100],['p9','Business Analyst',40]]),
+ mkP('044','Office Relocation 2027','t5','Internal','p5','On Hold','Low',60000,'2026-10-01',15,'Move HQ to the new campus: facilities, IT infrastructure and people logistics.',[]),
+ mkP('029','Pulse Mobile App','t1','Pulse Health','p1','Completed','Medium',210000,'2026-02-02',100,'Patient engagement app for iOS and Android with appointment and records modules.',[['p7','Backend Engineer',100],['p8','Frontend Engineer',100]]),
+ mkP('046','Customer Portal Revamp','t1','Internal','p6','Active','Medium',140000,'2026-10-12',22,'Self-service portal redesign with SSO and new support workflows.',[['p8','Frontend Engineer',70],['p12','UX Designer',50]])];
+
+/* ---------- state ---------- */
+const S={view:'projects',pid:null,tab:'overview',q:'',fs:'All',fc:'All',sort:'recent',pview:'cards',tcat:'All',w:null,wstep:0,td:null,collapsed:new Set(),modal:null};
+const cur=()=>PROJECTS.find(p=>p.id===S.pid);
+const tplOf=id=>TEMPLATES.find(t=>t.id===id);
+const rootsOf=c=>c==='proj'?cur().nodes:c==='wiz'?S.w.nodes:c==='tpl'?S.td.nodes:c.startsWith('prev-')?tplOf(c.slice(5)).nodes:S.modal.t.nodes;
+const lvlsOf=c=>c==='proj'?cur().levels:c==='wiz'?S.w.levels:c==='tpl'?S.td.levels:c.startsWith('prev-')?tplOf(c.slice(5)).levels:S.modal.t.levels;
+const baseOf=c=>c==='proj'?cur().start:c==='wiz'?S.w.start:null;
+const lbl=(c,off)=>baseOf(c)?fmt(addDays(baseOf(c),off)):'Day '+off;
+const done=(c,n)=>c==='proj'&&span(n)[1]<=cur().progress/100*total(cur().nodes);
+function levelName(c,n,d){return n.kind==='milestone'?'Milestone':n.kind==='deliverable'?'Deliverable':(lvlsOf(c)[d]||'Sub-component')}
+const nodeIcon=(n,d)=>n.kind==='milestone'?['flag','#f59e0b']:n.kind==='deliverable'?['box','#10b981']:[['layers','grid','box','copy'][Math.min(d,3)],['#4f46e5','#7c3aed','#0891b2','#64748b'][Math.min(d,3)]];
+
+/* ---------- tree ---------- */
+function treeHtml(c,ro){
+  const roots=rootsOf(c),T=Math.max(total(roots),1);
+  const all=flat(roots);const byId={};all.forEach(x=>byId[x.n.id]=x.n);
+  const rows=(a,d)=>a.map(n=>{
+    const[s,e]=span(n),open=!S.collapsed.has(n.id),[ic,col]=nodeIcon(n,d),isMs=n.kind==='milestone';
+    const preds=n.dep.map(i=>byId[i]).filter(Boolean),conf=preds.some(p=>span(p)[1]>s);
+    const dn=done(c,n);
+    const kid=n.kids.length&&open?rows(n.kids,d+1):'';
+    return`<div class="row d${Math.min(d,1)}" data-node="${n.id}" data-ctx="${c}" ${ro?'':'draggable="true"'}>
+      <div class="tc" style="padding-left:${d*22}px">${ro?'':`<span class="grip">${ico('grip')}</span>`}
+        <button class="chev ${n.kids.length?(open?'open':''):'none'}" data-act="tog" data-id="${n.id}">${ico('chev')}</button>
+        <span class="tile sm" style="background:${col}">${ico(ic)}</span>
+        <span class="nm" data-act="${ro?'':'edit'}" data-id="${n.id}" data-ctx="${c}" title="${esc(n.name)}">${esc(n.name)}</span>
+        <span class="lvl">${levelName(c,n,d)}</span>${dn&&(isMs||n.kind==='deliverable')?`<span class="chip ok">${ico('check')}done</span>`:''}</div>
+      <div class="sm">${n.res?`<span class="chip">${esc(n.res)}</span>`:'<span class="mut">-</span>'}
+        ${preds.length?`<span class="chip ${conf?'warn':'link'}" title="${conf?'Starts before predecessor ends: ':'Depends on: '}${esc(preds.map(p=>p.name).join(', '))}">${ico('link')}${preds.length}</span>`:''}</div>
+      <div class="sm mut">${isMs?lbl(c,s):`${lbl(c,s).replace(/ 20\d\d/,'')} → ${lbl(c,e).replace(/ 20\d\d/,'')}`}${isMs?'':`<br><span style="font-size:11px">${e-s} days</span>`}</div>
+      <div class="gantt"><i class="${isMs?'ms':n.kind==='deliverable'?'dv':''} ${dn?'dn':''}" style="left:${s/T*100}%;width:${Math.max((e-s)/T*100,.8)}%"></i></div>
+      <div class="acts">${ro?'':`${isMs||n.kind==='deliverable'?'':`<button class="ib" title="Add child" data-act="add" data-id="${n.id}" data-ctx="${c}">${ico('plus')}</button>`}<button class="ib" title="Edit" data-act="edit" data-id="${n.id}" data-ctx="${c}">${ico('edit')}</button><button class="ib" title="Delete" data-act="del" data-id="${n.id}" data-ctx="${c}">${ico('trash')}</button>`}</div>
+    </div>${kid}`}).join('');
+  return`<div class="card tree" data-tree="${c}">
+    ${ro?'':`<div class="tbar"><button class="btn sm pri" data-act="addroot" data-ctx="${c}">${ico('plus')}Add ${lvlsOf(c)[0].toLowerCase()}</button>
+      <button class="btn sm" data-act="addms" data-ctx="${c}">${ico('flag')}Milestone</button><button class="btn sm" data-act="expall">${ico('expand')}Expand / collapse</button><span class="sp"></span>
+      <span class="mut sm">${all.length} items · ${total(roots)} days · drag rows to re-arrange or nest</span></div>`}
+    <div class="th"><div>Structure</div><div>Resource / deps</div><div>Schedule</div><div>Timeline</div><div></div></div>
+    ${roots.length?rows(roots,0):`<div class="empty"><h3>Empty structure</h3><p>Add a ${lvlsOf(c)[0].toLowerCase()} to begin, or start from a template.</p></div>`}</div>`}
+
+/* ---------- views ---------- */
+function side(){const n=(v,i,t,on)=>`<button class="nav ${on?'on':''}" data-act="go" data-v="${v}">${ico(i)}${t}</button>`;
+  $('side').innerHTML=`<div class="brand"><div class="logo">${ico('layers')}</div>Orbit ERP</div><div class="nav-h">Project Management</div>
+  ${n('projects','grid','Projects',['projects','project','wizard'].includes(S.view))}${n('templates','copy','Templates',['templates','tpl-edit'].includes(S.view))}
+  <div class="nav-h">Other modules</div>${['Finance','Inventory','Procurement','HR & Payroll'].map(x=>`<div class="nav dis">${ico('folder')}${x}</div>`).join('')}
+  <div class="user">${avatar('p1','lg')}<div><div class="b sm">Priya Nair</div><div class="sm" style="color:#7f89a8">Admin</div></div></div>`}
+const $=id=>document.getElementById(id);
+
+function pcard(p){return`<div class="card pc" data-act="open" data-id="${p.id}">
+  <div class="row2"><span class="code">${p.code}</span><span class="pill ${sc(p.status)}">${p.status}</span></div>
+  <div class="row2" style="justify-content:flex-start;gap:12px"><span class="tile" style="background:${catG(p.category)}">${ico(catI(p.category))}</span><div><h3>${esc(p.name)}</h3><div class="sm mut">${esc(p.client)} · ${p.category}</div></div></div>
+  <div><div class="row2 sm" style="margin-bottom:6px"><span class="mut">Progress</span><b>${p.progress}%</b></div><div class="bar ${p.status==='Completed'?'ok':p.status==='At Risk'?'warn':''}"><i style="width:${p.progress}%"></i></div></div>
+  <div class="row2 sm"><span class="pr pr-${p.priority}"><i></i>${p.priority}</span><span class="mut">${fmt(p.start).replace(/ 20\d\d/,'')} → ${fmt(p.end)}</span></div>
+  <div class="row2"><div class="avs">${avatar(p.pm)}${p.team.slice(0,3).map(t=>avatar(t.pid)).join('')}${p.team.length>3?`<span class="av" style="background:#94a3b8">+${p.team.length-3}</span>`:''}</div><b>${money(p.budget)}</b></div></div>`}
+function plist(){
+  let ps=PROJECTS.filter(p=>(S.fs==='All'||p.status===S.fs)&&(S.fc==='All'||p.category===S.fc)&&(p.name+p.code+p.client).toLowerCase().includes(S.q.toLowerCase()));
+  const so={recent:(a,b)=>b.start.localeCompare(a.start),name:(a,b)=>a.name.localeCompare(b.name),budget:(a,b)=>b.budget-a.budget,progress:(a,b)=>b.progress-a.progress,priority:(a,b)=>PRIO.indexOf(a.priority)-PRIO.indexOf(b.priority)};
+  ps.sort(so[S.sort]);if(!ps.length)return'<div class="card empty"><h3>No projects match</h3>Try clearing the filters.</div>';
+  if(S.pview==='cards')return`<div class="grid">${ps.map(pcard).join('')}</div>`;
+  return`<div class="card"><table class="t"><tr><th>Project</th><th>Status</th><th>Priority</th><th>Manager</th><th>Timeline</th><th>Progress</th><th>Budget</th></tr>${ps.map(p=>`<tr class="cl" data-act="open" data-id="${p.id}"><td><div class="b">${esc(p.name)}</div><div class="code">${p.code} · ${p.category}</div></td><td><span class="pill ${sc(p.status)}">${p.status}</span></td><td><span class="pr pr-${p.priority}"><i></i>${p.priority}</span></td><td>${avatar(p.pm)} <span class="sm">${person(p.pm).name}</span></td><td class="sm">${fmt(p.start)} → ${fmt(p.end)}</td><td style="width:150px"><div class="bar"><i style="width:${p.progress}%"></i></div></td><td class="b">${money(p.budget)}</td></tr>`).join('')}</table></div>`}
+function vProjects(){const a=PROJECTS.filter(p=>p.status==='Active').length,r=PROJECTS.filter(p=>p.status==='At Risk').length;
+  return`<div class="top"><div><h1>Projects</h1><div class="sub">Structured, component-based projects across every business unit.</div></div><div style="display:flex;gap:10px"><button class="btn" data-act="go" data-v="templates">${ico('copy')}Templates</button><button class="btn pri" data-act="newproj">${ico('plus')}New project</button></div></div>
+  <div class="kpis"><div class="card kpi"><div class="l">Total projects</div><div class="v">${PROJECTS.length}</div><div class="s">${PROJECTS.filter(p=>p.tid).length} built from templates</div></div><div class="card kpi"><div class="l">Active</div><div class="v">${a}</div><div class="s">in delivery now</div></div><div class="card kpi"><div class="l">At risk</div><div class="v" style="color:var(--bad)">${r}</div><div class="s">need attention</div></div><div class="card kpi"><div class="l">Portfolio budget</div><div class="v">${money(PROJECTS.reduce((s,p)=>s+p.budget,0))}</div><div class="s">${PROJECTS.reduce((s,p)=>s+flat(p.nodes).length,0)} structure items</div></div></div>
+  <div class="tools"><div class="search">${ico('search')}<input class="inp" id="q" placeholder="Search name, code or client…" value="${esc(S.q)}"></div>
+   <select class="inp" data-s="fs"><option>All</option>${STAT.map(s=>`<option ${S.fs===s?'selected':''}>${s}</option>`).join('')}</select>
+   <select class="inp" data-s="fc"><option>All</option>${CATS.map(s=>`<option ${S.fc===s?'selected':''}>${s}</option>`).join('')}</select>
+   <select class="inp" data-s="sort">${[['recent','Newest start'],['name','Name'],['budget','Budget'],['progress','Progress'],['priority','Priority']].map(o=>`<option value="${o[0]}" ${S.sort===o[0]?'selected':''}>Sort: ${o[1]}</option>`).join('')}</select>
+   <span class="sp" style="flex:1"></span><div class="seg"><button class="${S.pview==='cards'?'on':''}" data-act="pv" data-v="cards">Cards</button><button class="${S.pview==='table'?'on':''}" data-act="pv" data-v="table">Table</button></div></div>
+  <div id="plist">${plist()}</div>`}
+
+function tabsH(){return['overview','components','milestones','team','budget','settings'].map(t=>`<button class="tab ${S.tab===t?'on':''}" data-act="tab" data-v="${t}">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}
+function phasePct(p,n){const[s,e]=span(n),el=p.progress/100*total(p.nodes);return Math.round(Math.max(0,Math.min(1,(el-s)/Math.max(e-s,1)))*100)}
+function vProject(){const p=cur(),t=tplOf(p.tid),all=flat(p.nodes),ms=all.filter(x=>x.n.kind==='milestone'),dl=all.filter(x=>x.n.kind==='deliverable');
+  const msd=ms.filter(x=>done('proj',x.n)).length,spent=Math.round(p.budget*p.progress/100*.94);
+  const head=`<div class="crumb"><a data-act="go" data-v="projects">Projects</a> / ${p.code}</div><div class="top"><div style="display:flex;gap:14px;align-items:center"><span class="tile" style="width:50px;height:50px;background:${catG(p.category)}">${ico(catI(p.category))}</span><div><h1>${esc(p.name)}</h1><div class="sub">${esc(p.client)} · ${p.category}${t?` · from template “${esc(t.name)}”`:' · created from scratch'}</div></div></div><div style="display:flex;gap:10px;align-items:center"><span class="pill ${sc(p.status)}">${p.status}</span><span class="pr pr-${p.priority}"><i></i>${p.priority}</span><button class="btn" data-act="savetpl">${ico('save')}Save as template</button></div></div><div class="tabs">${tabsH()}</div>`;
+  let b='';
+  if(S.tab==='overview'){b=`<div class="kpis"><div class="card kpi"><div class="l">Progress</div><div class="v">${p.progress}%</div><div class="bar" style="margin-top:8px"><i style="width:${p.progress}%"></i></div></div><div class="card kpi"><div class="l">Budget used</div><div class="v">${money(spent)}</div><div class="s">of ${money(p.budget)} (${Math.round(spent/p.budget*100)}%)</div></div><div class="card kpi"><div class="l">Milestones</div><div class="v">${msd}/${ms.length}</div><div class="s">${dl.length} deliverables planned</div></div><div class="card kpi"><div class="l">Structure</div><div class="v">${all.length}</div><div class="s">${p.nodes.length} ${p.levels[0].toLowerCase()}s · ${total(p.nodes)} days</div></div></div>
+   <div class="cols"><div style="display:flex;flex-direction:column;gap:18px"><div class="card pad"><h2 style="margin-bottom:12px">${p.levels[0]} progress</h2><div class="phases">${p.nodes.map(n=>{const x=phasePct(p,n);return`<div class="ph"><div class="sm b" style="margin-bottom:6px">${esc(n.name)}</div><div class="bar ${x===100?'ok':''}"><i style="width:${x}%"></i></div><div class="sm mut" style="margin-top:6px">${x}% · ${flat(n.kids).length} items</div></div>`}).join('')||'<div class="mut">No phases yet.</div>'}</div></div>
+   <div class="card pad"><h2 style="margin-bottom:12px">Upcoming milestones & deliverables</h2>${ms.concat(dl).sort((a,b)=>span(a.n)[1]-span(b.n)[1]).filter(x=>!done('proj',x.n)).slice(0,5).map(x=>`<div class="row2" style="padding:9px 0;border-bottom:1px solid var(--line)"><span class="tc"><span class="tile sm" style="background:${nodeIcon(x.n,0)[1]}">${ico(nodeIcon(x.n,0)[0])}</span>${esc(x.n.name)}</span><span class="sm mut">${fmt(addDays(p.start,span(x.n)[1]))}</span></div>`).join('')||'<div class="mut">All complete 🎉</div>'}</div></div>
+   <div class="card pad"><h2 style="margin-bottom:14px">Details</h2><dl class="kv"><dt>Description</dt><dd>${esc(p.desc)}</dd><dt>Client</dt><dd>${esc(p.client)}</dd><dt>Manager</dt><dd>${avatar(p.pm)} ${person(p.pm).name}</dd><dt>Start</dt><dd>${fmt(p.start)}</dd><dt>End</dt><dd>${fmt(p.end)}</dd><dt>Budget</dt><dd>${money(p.budget)}</dd><dt>Hierarchy</dt><dd>${p.levels.join(' › ')}</dd></dl></div></div>`}
+  if(S.tab==='components')b=treeHtml('proj');
+  if(S.tab==='milestones'){const list=ms.concat(dl).sort((a,b)=>span(a.n)[1]-span(b.n)[1]);b=`<div class="card"><table class="t"><tr><th>Item</th><th>Type</th><th>Belongs to</th><th>Due</th><th>Depends on</th><th>Status</th></tr>${list.map(x=>{const par=find(p.nodes,x.n.id).par,pr=x.n.dep.map(i=>find(p.nodes,i)?.n.name).filter(Boolean);const d=done('proj',x.n);return`<tr><td><span class="tc"><span class="tile sm" style="background:${nodeIcon(x.n,0)[1]}">${ico(nodeIcon(x.n,0)[0])}</span><b>${esc(x.n.name)}</b></span></td><td>${x.n.kind}</td><td class="mut">${par?esc(par.name):'-'}</td><td>${fmt(addDays(p.start,span(x.n)[1]))}</td><td class="sm">${pr.map(esc).join(', ')||'-'}</td><td>${d?'<span class="chip ok">Achieved</span>':'<span class="chip">Upcoming</span>'}</td></tr>`}).join('')}</table></div>`}
+  if(S.tab==='team'){b=`<div class="cols"><div class="card pad"><div class="row2" style="margin-bottom:14px"><h2>Team (${p.team.length+1})</h2></div>
+   <div class="row2" style="padding:10px 0;border-bottom:1px solid var(--line)"><span class="tc">${avatar(p.pm,'lg')}<div><div class="b">${person(p.pm).name}</div><div class="sm mut">Project Manager</div></div></span><span class="chip link">Manager</span></div>
+   ${p.team.map((m,i)=>`<div class="row2" style="padding:10px 0;border-bottom:1px solid var(--line)"><span class="tc">${avatar(m.pid,'lg')}<div><div class="b">${person(m.pid).name}</div><div class="sm mut">${esc(m.role)}</div></div></span><span class="tc" style="width:200px"><div class="bar" style="flex:1"><i style="width:${m.alloc}%"></i></div><span class="sm">${m.alloc}%</span><button class="ib" data-act="rmmember" data-i="${i}">${ico('x')}</button></span></div>`).join('')}
+   <div class="tools" style="margin:16px 0 0"><select class="inp" id="nm-p" style="flex:1">${PEOPLE.filter(x=>x.id!==p.pm&&!p.team.some(t=>t.pid===x.id)).map(x=>`<option value="${x.id}">${x.name} - ${x.role}</option>`).join('')}</select><button class="btn" data-act="addmember">${ico('plus')}Add member</button></div></div>
+   <div class="card pad"><h2 style="margin-bottom:12px">Resource plan</h2><div class="sm mut" style="margin-bottom:10px">Required resources come from the template and are matched against assigned roles.</div>${p.resources.map(r=>{const have=p.team.filter(t=>t.role===r.role).length+(person(p.pm).role===r.role?1:0);return`<div class="row2 sm" style="padding:8px 0;border-bottom:1px solid var(--line)"><span>${esc(r.role)}</span><span class="chip ${have>=r.qty?'ok':'warn'}">${have}/${r.qty}</span></div>`}).join('')||'<div class="mut">No resource plan.</div>'}</div></div>`}
+  if(S.tab==='budget'){const lv=leaves(p.nodes).filter(x=>x.n.kind==='node'),W=lv.reduce((s,x)=>s+x.n.dur,0)||1;
+   b=`<div class="kpis"><div class="card kpi"><div class="l">Total budget</div><div class="v">${money(p.budget)}</div></div><div class="card kpi"><div class="l">Spent</div><div class="v">${money(spent)}</div></div><div class="card kpi"><div class="l">Committed</div><div class="v">${money(Math.round(p.budget*.18))}</div></div><div class="card kpi"><div class="l">Remaining</div><div class="v" style="color:var(--ok)">${money(p.budget-spent-Math.round(p.budget*.18))}</div></div></div>
+   <div class="card"><table class="t"><tr><th>${p.levels[0]}</th><th>Allocation</th><th style="width:34%">Spend vs allocation</th><th>Spent</th></tr>${p.nodes.map(n=>{const w=leaves([n]).filter(x=>x.n.kind==='node').reduce((s,x)=>s+x.n.dur,0),al=Math.round(p.budget*w/W),pc=phasePct(p,n),sp=Math.round(al*pc/100*.94);return`<tr><td class="b">${esc(n.name)}</td><td>${money(al)} <span class="mut sm">(${Math.round(w/W*100)}%)</span></td><td><div class="bar"><i style="width:${pc}%"></i></div></td><td>${money(sp)}</td></tr>`}).join('')}</table></div>`}
+  if(S.tab==='settings'){const tg=(k,t,d)=>`<div class="tog"><div><div class="b">${t}</div><div class="sm mut">${d}</div></div><input type="checkbox" data-b="p.settings.${k}" ${p.settings[k]?'checked':''} style="width:20px;height:20px"></div>`;
+   b=`<div class="cols"><div class="card pad"><h2 style="margin-bottom:14px">General</h2><div class="f2"><label class="f">Project name<input class="inp" data-b="p.name" value="${esc(p.name)}"></label><label class="f">Project code<input class="inp" data-b="p.code" value="${esc(p.code)}"></label><label class="f">Status<select class="inp" data-b="p.status" data-r>${STAT.map(s=>`<option ${p.status===s?'selected':''}>${s}</option>`).join('')}</select></label><label class="f">Priority<select class="inp" data-b="p.priority" data-r>${PRIO.map(s=>`<option ${p.priority===s?'selected':''}>${s}</option>`).join('')}</select></label><label class="f">Budget<input class="inp" type="number" data-b="p.budget" data-n value="${p.budget}"></label><label class="f">Client<input class="inp" data-b="p.client" value="${esc(p.client)}"></label><label class="f full">Description<textarea class="inp" rows="3" data-b="p.desc">${esc(p.desc)}</textarea></label></div></div>
+   <div style="display:flex;flex-direction:column;gap:18px"><div class="card pad"><h2>Structure rules</h2>${tg('lock','Lock structure','Prevent changes to phases and modules after kickoff.')}${tg('autoSched','Auto-schedule from dependencies','Shift successors when a predecessor moves.')}${tg('notify','Milestone notifications','Alert the team when a milestone is reached.')}</div>
+   <div class="card pad"><h2 style="margin-bottom:10px">Danger zone</h2><button class="btn dng" data-act="delproj">${ico('trash')}Delete project</button></div></div></div>`}
+  return head+b}
+
+/* template gallery */
+function tcard(t){const T=total(t.nodes);const st=flat(t.nodes);return`<div class="card tcard"><div class="hd" style="background:${catG(t.category)}"><span class="big">${ico(catI(t.category))}</span><span class="chip" style="background:rgba(255,255,255,.22);color:#fff">${esc(t.category)}</span>${t.isDefault?`<span class="star" style="float:right" title="Default for category">${ico('star')}</span>`:''}<h3>${esc(t.name)}</h3></div>
+ <div class="bd"><div class="sm mut" style="min-height:38px">${esc(t.desc)}</div>
+ <div class="mini">${t.nodes.map(n=>{const[s,e]=span(n);return`<div title="${esc(n.name)}"><i style="left:${s/T*100}%;width:${(e-s)/T*100}%;background:${catG(t.category)}"></i></div>`}).join('')}</div>
+ <div class="stats"><span><b>${t.nodes.length}</b> ${t.levels[0].toLowerCase()}s</span><span><b>${st.length}</b> items</span><span><b>${T}</b> days</span><span>Used <b>${t.uses}×</b></span></div>
+ <div class="row2" style="margin-top:auto"><button class="btn pri sm" data-act="usetpl" data-id="${t.id}">${ico('wand')}Use template</button><span><button class="ib" title="Preview" data-act="prevtpl" data-id="${t.id}">${ico('eye')}</button><button class="ib" title="Edit" data-act="edittpl" data-id="${t.id}">${ico('edit')}</button><button class="ib" title="Duplicate" data-act="duptpl" data-id="${t.id}">${ico('copy')}</button><button class="ib" title="${t.isDefault?'Default':'Set as default'}" data-act="deftpl" data-id="${t.id}" ${t.isDefault?'style="color:#f59e0b"':''}>${ico('star')}</button><button class="ib" title="Delete" data-act="deltpl" data-id="${t.id}">${ico('trash')}</button></span></div></div></div>`}
+function vTemplates(){const cats=['All',...new Set(TEMPLATES.map(t=>t.category))],ts=TEMPLATES.filter(t=>S.tcat==='All'||t.category===S.tcat);
+  return`<div class="top"><div><h1>Project templates</h1><div class="sub">Reusable structures that generate a complete project hierarchy in one click.</div></div><button class="btn pri" data-act="newtpl">${ico('plus')}New template</button></div>
+  <div class="tools">${cats.map(c=>`<button class="cat-b ${S.tcat===c?'on':''}" data-act="tcat" data-v="${c}">${c}</button>`).join('')}</div>
+  <div class="tg">${ts.map(tcard).join('')}<div class="card tcard" style="border:2px dashed #c9cdf5;box-shadow:none;background:transparent;align-items:center;justify-content:center;min-height:300px;cursor:pointer" data-act="newtpl"><div class="empty">${ico('plus')}<h3>Create a template</h3>Start blank or define your own hierarchy levels for any industry.</div></div></div>`}
+
+function vTplEdit(){const t=S.td;
+  return`<div class="crumb"><a data-act="go" data-v="templates">Templates</a> / ${t.id?'Edit':'New'}</div><div class="top"><div><h1>${t.id?'Edit template':'New template'}</h1><div class="sub">Define hierarchy labels, default structure, suggested timeline and required resources.</div></div><div style="display:flex;gap:10px"><button class="btn" data-act="go" data-v="templates">Cancel</button><button class="btn pri" data-act="savetd">${ico('check')}Save template</button></div></div>
+  <div class="cols" style="margin-bottom:18px"><div class="card pad"><div class="f2"><label class="f">Template name<input class="inp" data-b="td.name" value="${esc(t.name)}"></label><label class="f">Category<input class="inp" list="cats" data-b="td.category" value="${esc(t.category)}"><datalist id="cats">${CATS.map(c=>`<option>${c}</option>`).join('')}</datalist></label>
+   <label class="f full">Description<textarea class="inp" rows="2" data-b="td.desc">${esc(t.desc)}</textarea></label>
+   <div class="full"><div class="b sm" style="margin-bottom:8px">Hierarchy level labels <span class="mut" style="font-weight:400">- rename levels to fit the industry</span></div><div class="f3" style="grid-template-columns:repeat(4,1fr)">${t.levels.map((l,i)=>`<input class="inp" data-lv="${i}" value="${esc(l)}" placeholder="Level ${i+1}">`).join('')}</div></div>
+   <label class="f">Default status<select class="inp" data-b="td.status">${STAT.map(s=>`<option ${t.status===s?'selected':''}>${s}</option>`).join('')}</select></label><label class="f">Default priority<select class="inp" data-b="td.priority">${PRIO.map(s=>`<option ${t.priority===s?'selected':''}>${s}</option>`).join('')}</select></label><label class="f">Suggested budget<input class="inp" type="number" data-n data-b="td.budget" value="${t.budget}"></label><label class="f" style="justify-content:end"><span class="tc"><input type="checkbox" data-b="td.isDefault" ${t.isDefault?'checked':''}> Default template for its category</span></label></div></div>
+   <div class="card pad"><div class="row2" style="margin-bottom:10px"><h2>Required resources</h2><button class="btn sm" data-act="addres">${ico('plus')}Add</button></div>${t.resources.map((r,i)=>`<div class="tc" style="margin-bottom:8px"><input class="inp" data-rr="${i}" data-k="role" value="${esc(r.role)}"><input class="inp" type="number" min="1" data-rr="${i}" data-k="qty" value="${r.qty}" style="width:70px"><button class="ib" data-act="rmres" data-i="${i}">${ico('x')}</button></div>`).join('')||'<div class="mut sm">No resources yet.</div>'}</div></div>
+  ${treeHtml('tpl')}`}
+
+/* wizard */
+const WSTEPS=['Basics','Structure source','Customize structure','Team & budget','Review'];
+function newW(){return{name:'',code:'PRJ-2026-0'+(48+PROJECTS.length-7),desc:'',client:'',contact:'',start:'2026-12-01',end:'2027-03-01',endAuto:true,pm:'p1',status:'Planning',priority:'Medium',budget:100000,category:'Software',source:null,tid:null,levels:[...LV0],nodes:[],resources:[],team:{}}}
+function syncEnd(){const w=S.w;if(w.endAuto&&w.nodes.length)w.end=addDays(w.start,total(w.nodes))}
+function vWizard(){const w=S.w,s=S.wstep,t=tplOf(w.tid);let b='';
+  if(s===0)b=`<div class="card pad"><div class="f2"><label class="f">Project name *<input class="inp" data-b="w.name" value="${esc(w.name)}" placeholder="e.g. Orion Data Platform"></label><label class="f">Project code / reference<input class="inp" data-b="w.code" value="${esc(w.code)}"></label>
+   <label class="f full">Description<textarea class="inp" rows="3" data-b="w.desc" placeholder="Goals, scope and context…">${esc(w.desc)}</textarea></label>
+   <label class="f">Client / customer<input class="inp" data-b="w.client" value="${esc(w.client)}" placeholder="Company or internal department"></label><label class="f">Client contact<input class="inp" data-b="w.contact" value="${esc(w.contact)}" placeholder="Name · email"></label>
+   <label class="f">Category / type<input class="inp" list="cats" data-b="w.category" value="${esc(w.category)}"><datalist id="cats">${CATS.map(c=>`<option>${c}</option>`).join('')}</datalist></label><label class="f">Project manager<select class="inp" data-b="w.pm">${PEOPLE.map(p=>`<option value="${p.id}" ${w.pm===p.id?'selected':''}>${p.name}</option>`).join('')}</select></label>
+   <label class="f">Start date<input class="inp" type="date" data-b="w.start" data-sync value="${w.start}"></label><label class="f">End date<input class="inp" type="date" data-b="w.end" data-noauto value="${w.end}"></label>
+   <label class="f">Status<select class="inp" data-b="w.status">${STAT.map(x=>`<option ${w.status===x?'selected':''}>${x}</option>`).join('')}</select></label><label class="f">Priority<select class="inp" data-b="w.priority">${PRIO.map(x=>`<option ${w.priority===x?'selected':''}>${x}</option>`).join('')}</select></label>
+   <label class="f">Budget / estimated cost ($)<input class="inp" type="number" data-n data-b="w.budget" value="${w.budget}"></label></div></div>`;
+  if(s===1)b=`<div class="f2" style="margin-bottom:18px"><div class="opt ${w.source==='scratch'?'on':''}" data-act="src" data-v="scratch"><span class="tile" style="background:#475569">${ico('plus')}</span><div><h3>Create from scratch</h3><div class="sm mut">Start with an empty structure and build phases, modules and components by hand.</div></div></div><div class="opt ${w.source==='template'?'on':''}" data-act="src" data-v="template"><span class="tile" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">${ico('wand')}</span><div><h3>Create from template</h3><div class="sm mut">Generate the complete hierarchy, timeline and resource plan from a saved template.</div></div></div></div>
+   ${w.source==='template'?`<h2 style="margin-bottom:12px">Choose a template</h2><div class="pick" style="margin-bottom:18px">${TEMPLATES.map(x=>`<div class="pk ${w.tid===x.id?'on':''}" data-act="picktpl" data-id="${x.id}"><span class="tile" style="background:${catG(x.category)}">${ico(catI(x.category))}</span><div><div class="b">${esc(x.name)}</div><div class="sm mut">${flat(x.nodes).length} items · ${total(x.nodes)} days</div></div></div>`).join('')}</div>${t?`<h2 style="margin-bottom:10px">Preview - ${esc(t.name)}</h2>`+treeHtml('prev-'+t.id).replace('data-tree=','data-t='):''}`:''}
+   ${w.source==='scratch'?'<div class="card empty"><h3>Empty project structure</h3>You\'ll add phases and components in the next step. Hierarchy levels default to Phase › Module › Component › Sub-component.</div>':''}`;
+  if(s===2)b=`<div class="sum"><b>${flat(w.nodes).length} items</b><span>Spans <b>${total(w.nodes)} days</b></span><span>Projected end <b>${fmt(addDays(w.start,total(w.nodes)))}</b></span><span style="flex:1"></span>
+   <span class="mut">Scale timeline</span><button class="btn sm" data-act="scale" data-v="0.9">−10%</button><button class="btn sm" data-act="scale" data-v="1.1">+10%</button><button class="btn sm" data-act="aligned">Align end date</button></div>${treeHtml('wiz')}`;
+  if(s===3){const rr=w.resources.length?w.resources:[];b=`<div class="cols"><div class="card pad"><h2 style="margin-bottom:6px">Assign team</h2><div class="sm mut" style="margin-bottom:14px">${t?'Required roles come from the template. Pick people for each seat.':'Add roles and assign people.'}</div>
+   ${rr.map((r,i)=>Array.from({length:r.qty},(_,k)=>`<div class="row2" style="margin-bottom:10px"><span class="chip" style="min-width:170px">${esc(r.role)}${r.qty>1?` #${k+1}`:''}</span><select class="inp" data-seat="${i}-${k}"><option value="">- Unassigned -</option>${PEOPLE.map(p=>`<option value="${p.id}" ${w.team[i+'-'+k]===p.id?'selected':''}>${p.name}${p.role===r.role?' ★':''}</option>`).join('')}</select></div>`).join('')).join('')||'<div class="empty">No required resources. Add members after creation from the Team tab.</div>'}</div>
+   <div class="card pad"><h2 style="margin-bottom:12px">Budget</h2><label class="f">Estimated cost ($)<input class="inp" type="number" data-n data-b="w.budget" value="${w.budget}"></label>${t?`<div class="sm mut" style="margin-top:10px">Template suggests ${money(t.budget)}.</div>`:''}<hr style="border:0;border-top:1px solid var(--line);margin:16px 0"><div class="sm mut">Allocation by ${w.levels[0].toLowerCase()} (weighted by duration)</div>${w.nodes.map(n=>{const W=leaves(w.nodes).reduce((a,x)=>a+x.n.dur,0)||1,x=leaves([n]).reduce((a,y)=>a+y.n.dur,0);return`<div class="row2 sm" style="padding:6px 0"><span>${esc(n.name)}</span><b>${money(Math.round(w.budget*x/W))}</b></div>`}).join('')}</div></div>`}
+  if(s===4){const m=person(w.pm);b=`<div class="cols"><div class="card pad"><h2 style="margin-bottom:14px">Summary</h2><dl class="kv"><dt>Name</dt><dd class="b">${esc(w.name)||'<span class="mut">(unnamed)</span>'}</dd><dt>Code</dt><dd>${esc(w.code)}</dd><dt>Client</dt><dd>${esc(w.client)||'-'}</dd><dt>Category</dt><dd>${esc(w.category)}</dd><dt>Manager</dt><dd>${m.name}</dd><dt>Dates</dt><dd>${fmt(w.start)} → ${fmt(w.end)}</dd><dt>Status / priority</dt><dd>${w.status} · ${w.priority}</dd><dt>Budget</dt><dd>${money(w.budget)}</dd><dt>Source</dt><dd>${t?'Template: '+esc(t.name):'From scratch'}</dd><dt>Team</dt><dd>${Object.values(w.team).filter(Boolean).length} assigned</dd></dl></div><div class="card pad"><h2 style="margin-bottom:12px">Generated structure</h2><div class="stats" style="margin-bottom:12px"><span><b>${w.nodes.length}</b> ${w.levels[0].toLowerCase()}s</span><span><b>${flat(w.nodes).filter(x=>x.n.kind==='milestone').length}</b> milestones</span><span><b>${flat(w.nodes).filter(x=>x.n.kind==='deliverable').length}</b> deliverables</span></div>${w.nodes.map(n=>`<div class="row2 sm" style="padding:6px 0;border-bottom:1px solid var(--line)"><span>${esc(n.name)}</span><span class="mut">${flat(n.kids).length} items</span></div>`).join('')||'<div class="mut">Empty - you can add components after creation.</div>'}</div></div>`}
+  const canNext=s===0?w.name.trim().length>0:s===1?(w.source==='scratch'||(w.source==='template'&&w.tid)):true;
+  return`<div class="crumb"><a data-act="go" data-v="projects">Projects</a> / New</div><div class="top"><div><h1>Create project</h1><div class="sub">Step ${s+1} of 5 - ${WSTEPS[s]}</div></div></div>
+  <div class="steps">${WSTEPS.map((x,i)=>`<div class="step ${i===s?'on':i<s?'done':''}"><span class="n">${i<s?'✓':i+1}</span>${x}</div>`).join('')}</div>${b}
+  <div class="foot"><button class="btn" data-act="wback">${s?'← Back':'Cancel'}</button>${s<4?`<button class="btn pri" data-act="wnext" ${canNext?'':'disabled'}>Continue →</button>`:`<button class="btn pri" data-act="create">${ico('check')}Create project</button>`}</div>`}
+
+/* modals */
+function modalH(){const m=S.modal;if(!m)return'';
+  if(m.type==='prev'){const t=m.t;return`<div class="ov" data-act="closem"><div class="md wide"><div class="mh"><h2>${esc(t.name)} - structure preview</h2><button class="ib" data-act="closem">${ico('x')}</button></div><div class="mb">${treeHtml('prev')}</div><div class="mf"><button class="btn" data-act="closem">Close</button><button class="btn pri" data-act="usetpl" data-id="${t.id}">Use this template</button></div></div></div>`}
+  if(m.type==='confirm')return`<div class="ov"><div class="md" style="width:430px"><div class="mh"><h2>${esc(m.title)}</h2></div><div class="mb">${esc(m.text)}</div><div class="mf"><button class="btn" data-act="closem">Cancel</button><button class="btn pri" style="background:var(--bad)" data-act="confirm">Delete</button></div></div></div>`;
+  if(m.type==='node'){const c=m.ctx,n=m.draft,others=flat(rootsOf(c)).filter(x=>x.n.id!==n.id&&!flat(n.kids||[]).some(k=>k.n.id===x.n.id));
+   return`<div class="ov"><div class="md"><div class="mh"><h2>${m.isNew?'Add':'Edit'} item</h2><button class="ib" data-act="closem">${ico('x')}</button></div><div class="mb"><div class="f2">
+   <label class="f full">Name<input class="inp" id="m-name" value="${esc(n.name)}"></label>
+   <label class="f">Type<select class="inp" id="m-kind"><option value="node" ${n.kind==='node'?'selected':''}>Structure (phase / module / component…)</option><option value="milestone" ${n.kind==='milestone'?'selected':''}>Milestone</option><option value="deliverable" ${n.kind==='deliverable'?'selected':''}>Deliverable</option></select></label>
+   <label class="f">Required resource / role<input class="inp" id="m-res" value="${esc(n.res)}"></label>
+   <label class="f">Start (day offset)<input class="inp" type="number" min="0" id="m-off" value="${n.off}"></label><label class="f">Duration (days)<input class="inp" type="number" min="0" id="m-dur" value="${n.dur}" ${n.kids.length?'disabled title="Parents roll up from children"':''}></label>
+   <div class="full"><div class="b sm" style="margin-bottom:6px">Depends on (predecessors)</div><div class="deps">${others.map(x=>`<label><input type="checkbox" class="m-dep" value="${x.n.id}" ${n.dep.includes(x.n.id)?'checked':''}><span style="padding-left:${x.d*12}px">${esc(x.n.name)}</span></label>`).join('')||'<span class="mut sm">Nothing to depend on yet.</span>'}</div></div></div></div>
+   <div class="mf"><button class="btn" data-act="closem">Cancel</button><button class="btn pri" data-act="savenode">Save</button></div></div></div>`}
+  return''}
+
+function render(){side();const v=S.view;$('app').innerHTML=v==='projects'?vProjects():v==='project'?vProject():v==='templates'?vTemplates():v==='tpl-edit'?vTplEdit():vWizard();$('layer').innerHTML=modalH();}
+const go=(v,extra)=>{Object.assign(S,{view:v},extra||{});S.modal=null;render();scrollTo(0,0)};
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
+
+/* ---------- actions ---------- */
+function newNode(c,parent){const kids=parent?parent.kids:rootsOf(c),d=parent?flat([parent]).length&&1:0;let off=parent?(parent.kids.length?span(parent)[1]:parent.off):(total(rootsOf(c)));return{id:uid(),key:null,name:'New item',off,dur:10,kind:'node',res:'',dep:[],kids:[]}}
+function openNode(c,n,isNew,parent){S.modal={type:'node',ctx:c,draft:JSON.parse(JSON.stringify(n)),isNew,parent:parent?parent.id:null,orig:n.id}; render()}
+function fixOffsets(){}
+const A={
+ go(e){go(e.dataset.v)},open(e){go('project',{pid:e.dataset.id,tab:'overview'})},tab(e){S.tab=e.dataset.v;render()},pv(e){S.pview=e.dataset.v;render()},tcat(e){S.tcat=e.dataset.v;render()},
+ tog(e){const id=e.dataset.id;S.collapsed.has(id)?S.collapsed.delete(id):S.collapsed.add(id);render()},
+ expall(){if(S.collapsed.size)S.collapsed.clear();else flat(rootsOf(ctxNow())).forEach(x=>x.n.kids.length&&S.collapsed.add(x.n.id));render()},
+ newproj(){S.w=newW();S.wstep=0;go('wizard')},
+ wback(){if(S.wstep)S.wstep--,render();else go('projects')},wnext(){S.wstep++;render()},
+ src(e){S.w.source=e.dataset.v;if(e.dataset.v==='scratch'){Object.assign(S.w,{tid:null,nodes:[],levels:[...LV0],resources:[]});syncEnd()}render()},
+ picktpl(e){const t=tplOf(e.dataset.id),w=S.w;Object.assign(w,{tid:t.id,nodes:clone(t.nodes),levels:[...t.levels],resources:t.resources.map(r=>({...r})),category:t.category,budget:t.budget,priority:t.priority,status:t.status,team:{},endAuto:true});syncEnd();render()},
+ usetpl(e){S.w=newW();S.wstep=1;S.view='wizard';S.modal=null;S.w.source='template';A.picktpl({dataset:{id:e.dataset.id}});scrollTo(0,0)},
+ scale(e){const f=+e.dataset.v;(function w(a){a.forEach(n=>{n.off=Math.round(n.off*f);n.dur=Math.round(n.dur*f);w(n.kids)})})(S.w.nodes);syncEnd();render()},
+ aligned(){S.w.end=addDays(S.w.start,total(S.w.nodes));S.w.endAuto=true;render()},
+ create(){const w=S.w,t=tplOf(w.tid),team=[];w.resources.forEach((r,i)=>{for(let k=0;k<r.qty;k++){const pid=w.team[i+'-'+k];if(pid&&pid!==w.pm)team.push({pid,role:r.role,alloc:80})}});
+  const p={id:'P'+Date.now(),code:w.code,name:w.name||'Untitled project',tid:w.tid,category:w.category,client:w.client||'Internal',contact:w.contact,pm:w.pm,status:w.status,priority:w.priority,budget:w.budget,start:w.start,end:w.end,progress:0,desc:w.desc,levels:w.levels,resources:w.resources,nodes:w.nodes,team,settings:{lock:false,notify:true,autoSched:true}};
+  PROJECTS.unshift(p);if(t)t.uses++;toast('Project created with '+flat(p.nodes).length+' structure items');go('project',{pid:p.id,tab:'components'})},
+ /* nodes */
+ addroot(e){const c=e.dataset.ctx;openNode(c,newNode(c,null),true,null)},
+ addms(e){const c=e.dataset.ctx,n=newNode(c,null);Object.assign(n,{kind:'milestone',name:'New milestone',dur:0,off:total(rootsOf(c))});openNode(c,n,true,null)},
+ add(e){const c=e.dataset.ctx,par=find(rootsOf(c),e.dataset.id).n;openNode(c,newNode(c,par),true,par)},
+ edit(e){if(!e.dataset.id)return;const c=e.dataset.ctx,f=find(rootsOf(c),e.dataset.id);openNode(c,f.n,false,null)},
+ del(e){const c=e.dataset.ctx,f=find(rootsOf(c),e.dataset.id);f.arr.splice(f.i,1);flat(rootsOf(c)).forEach(x=>x.n.dep=x.n.dep.filter(d=>d!==e.dataset.id));afterEdit(c);toast('Removed “'+f.n.name+'”')},
+ savenode(){const m=S.modal,c=m.ctx,d=m.draft,g=i=>$(i).value;d.name=g('m-name')||'Untitled';d.kind=g('m-kind');d.res=g('m-res');d.off=+g('m-off')||0;if(!d.kids.length)d.dur=d.kind==='milestone'?0:(+g('m-dur')||0);d.dep=[...document.querySelectorAll('.m-dep:checked')].map(x=>x.value);
+  if(m.isNew){(m.parent?find(rootsOf(c),m.parent).n.kids:rootsOf(c)).push(d);if(m.parent)S.collapsed.delete(m.parent)}else{const f=find(rootsOf(c),m.orig);const kids=f.n.kids;Object.assign(f.n,d,{kids})}
+  S.modal=null;afterEdit(c)},
+ closem(){S.modal=null;render()},confirm(){S.modal.ok();},
+ /* project */
+ addmember(){const id=$('nm-p')?.value;if(!id)return;cur().team.push({pid:id,role:person(id).role,alloc:60});render()},rmmember(e){cur().team.splice(+e.dataset.i,1);render()},
+ delproj(){S.modal={type:'confirm',title:'Delete project?',text:'This permanently removes the project and its component structure.',ok(){PROJECTS=PROJECTS.filter(p=>p.id!==S.pid);S.modal=null;go('projects');toast('Project deleted')}};render()},
+ savetpl(){const p=cur();S.td={id:null,name:p.name+' - Template',category:p.category,desc:'Saved from project '+p.code+'.',levels:[...p.levels],status:'Planning',priority:p.priority,budget:p.budget,resources:p.resources.map(r=>({...r})),isDefault:false,nodes:clone(p.nodes)};go('tpl-edit')},
+ /* templates */
+ newtpl(){S.td={id:null,name:'',category:'Software',desc:'',levels:[...LV0],status:'Planning',priority:'Medium',budget:100000,resources:[],isDefault:false,nodes:[]};go('tpl-edit')},
+ edittpl(e){const t=tplOf(e.dataset.id);S.td={...t,levels:[...t.levels],resources:t.resources.map(r=>({...r})),nodes:JSON.parse(JSON.stringify(t.nodes))};go('tpl-edit')},
+ prevtpl(e){const t=tplOf(e.dataset.id);S.modal={type:'prev',t,nodes:t.nodes,levels:t.levels};render()},
+ duptpl(e){const t=tplOf(e.dataset.id),c={...t,id:'t'+Date.now(),name:t.name+' (Copy)',isDefault:false,uses:0,nodes:clone(t.nodes),resources:t.resources.map(r=>({...r})),levels:[...t.levels]};TEMPLATES.splice(TEMPLATES.indexOf(t)+1,0,c);toast('Template duplicated');render()},
+ deftpl(e){const t=tplOf(e.dataset.id);TEMPLATES.forEach(x=>{if(x.category===t.category)x.isDefault=false});t.isDefault=true;toast(t.name+' is now the default for '+t.category);render()},
+ deltpl(e){const t=tplOf(e.dataset.id);S.modal={type:'confirm',title:'Delete template?',text:`“${t.name}” will be removed. Existing projects built from it keep their structure.`,ok(){TEMPLATES=TEMPLATES.filter(x=>x!==t);S.modal=null;render();toast('Template deleted')}};render()},
+ savetd(){const t=S.td;if(!t.name.trim()){toast('Give the template a name');return}if(t.isDefault)TEMPLATES.forEach(x=>{if(x.category===t.category)x.isDefault=false});
+  if(t.id){Object.assign(tplOf(t.id),t)}else{TEMPLATES.push({...t,id:'t'+Date.now(),uses:0,updated:'Today'})}toast('Template saved');go('templates')},
+ addres(){S.td.resources.push({role:'New role',qty:1});render()},rmres(e){S.td.resources.splice(+e.dataset.i,1);render()}};
+function ctxNow(){return S.view==='project'?'proj':S.view==='wizard'?'wiz':S.view==='tpl-edit'?'tpl':'prev'}
+function afterEdit(c){if(c==='wiz')syncEnd();if(c==='proj'){const p=cur();p.end=addDays(p.start,total(p.nodes))}render()}
+
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el||!el.dataset.act)return;if(e.target.closest('[data-act="tog"]')&&el.dataset.act!=='tog')return;if(el.classList.contains('ov')&&e.target!==el)return;e.stopPropagation();A[el.dataset.act]?.(el)});
+function setPath(path,val){const[r,...k]=path.split('.');let o=r==='w'?S.w:r==='td'?S.td:cur();while(k.length>1)o=o[k.shift()];o[k[0]]=val}
+document.addEventListener('input',e=>{const t=e.target;
+  if(t.id==='q'){S.q=t.value;$('plist').innerHTML=plist();return}
+  if(t.dataset.b){setPath(t.dataset.b,t.type==='checkbox'?t.checked:t.dataset.n!==undefined?+t.value:t.value);if(t.dataset.noauto!==undefined)S.w.endAuto=false;if(t.dataset.sync!==undefined)syncEnd()}
+  if(t.dataset.lv!==undefined){const l=S.td?.levels||S.w.levels;l[+t.dataset.lv]=t.value}
+  if(t.dataset.rr!==undefined){S.td.resources[+t.dataset.rr][t.dataset.k]=t.dataset.k==='qty'?+t.value||1:t.value}});
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.dataset.s){S[t.dataset.s]=t.value;$('plist').innerHTML=plist()}
+  if(t.dataset.seat){S.w.team[t.dataset.seat]=t.value}
+  if(t.dataset.r!==undefined||t.dataset.sync!==undefined)render()});
+
+/* ---------- drag & drop ---------- */
+let drag=null;
+const rowEl=e=>e.target.closest&&e.target.closest('.row[data-node]');
+document.addEventListener('dragstart',e=>{const r=rowEl(e);if(!r)return;drag={id:r.dataset.node,ctx:r.dataset.ctx};r.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',drag.id)});
+function zone(e,r){const b=r.getBoundingClientRect(),y=(e.clientY-b.top)/b.height;return y<.28?'before':y>.72?'after':'in'}
+function clr(){document.querySelectorAll('.drop-before,.drop-after,.drop-in,.dragging').forEach(x=>x.classList.remove('drop-before','drop-after','drop-in','dragging'))}
+document.addEventListener('dragover',e=>{if(!drag)return;const r=rowEl(e);if(!r||r.dataset.ctx!==drag.ctx)return;const src=find(rootsOf(drag.ctx),drag.id);if(!src||r.dataset.node===drag.id||find(src.n.kids,r.dataset.node))return;e.preventDefault();document.querySelectorAll('.drop-before,.drop-after,.drop-in').forEach(x=>x.classList.remove('drop-before','drop-after','drop-in'));const tg=find(rootsOf(drag.ctx),r.dataset.node).n;r.classList.add('drop-'+(zone(e,r)==='in'&&(tg.kind!=='node')?'after':zone(e,r)))});
+document.addEventListener('drop',e=>{if(!drag)return;const r=rowEl(e);if(!r||r.dataset.ctx!==drag.ctx){clr();drag=null;return}e.preventDefault();const c=drag.ctx,roots=rootsOf(c),src=find(roots,drag.id);if(!src||r.dataset.node===drag.id||find(src.n.kids,r.dataset.node)){clr();drag=null;return}
+  let z=zone(e,r);const tg=find(roots,r.dataset.node);if(z==='in'&&tg.n.kind!=='node')z='after';
+  src.arr.splice(src.i,1);const t2=find(roots,r.dataset.node);
+  if(z==='in'){t2.n.kids.push(src.n);S.collapsed.delete(t2.n.id)}else t2.arr.splice(t2.i+(z==='after'?1:0),0,src.n);
+  drag=null;afterEdit(c);toast('Moved “'+src.n.name+'”')});
+document.addEventListener('dragend',()=>{clr();drag=null});
+render();
+</script>
+</body>
+</html>

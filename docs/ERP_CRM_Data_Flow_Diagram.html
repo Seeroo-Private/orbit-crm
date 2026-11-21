@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ERP CRM Data Flow Diagram</title>
+<style>
+  :root { --bg:#fff; --fg:#1b2430; --muted:#5b6675; --line:#d5dbe3; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#14181f; --fg:#e6eaf0; --muted:#9aa5b4; --line:#2c3440; } }
+  body { margin:0; padding:24px 16px 48px; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui,Segoe UI,sans-serif; }
+  main { max-width:1280px; margin:0 auto; }
+  h1 { font-size:24px; margin:0 0 4px; }
+  h2 { font-size:18px; margin:40px 0 4px; }
+  p.sub { color:var(--muted); margin:0 0 16px; }
+  .card { border:1px solid var(--line); border-radius:10px; padding:12px; overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th,td { border:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  code { font-size:12px; }
+  .bar { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px; align-items:center; }
+  .bar button { border:1px solid var(--line); background:var(--bg); color:var(--fg); border-radius:999px; padding:5px 12px; font:inherit; font-size:13px; cursor:pointer; }
+  .bar button:hover, .bar button.on { background:#2563eb; color:#fff; border-color:#2563eb; }
+  .panel { margin-top:12px; padding:10px 14px; border:1px solid var(--line); border-radius:10px; font-size:14px; min-height:44px; }
+  .panel b { color:#2563eb; }
+  .panel ul { margin:4px 0 8px 18px; padding:0; }
+  .hint { color:var(--muted); font-size:13px; }
+  svg .node { cursor:pointer; }
+  svg .dim { opacity:.12; transition:opacity .15s; }
+  svg .edgePaths path.hl { stroke:#e11d48 !important; stroke-width:3.5px !important; }
+  svg .node.hl rect, svg .node.hl circle, svg .node.hl polygon, svg .node.hl path, svg .node.hl ellipse { stroke:#e11d48 !important; stroke-width:3px !important; }
+  svg .node.sel rect, svg .node.sel circle, svg .node.sel polygon, svg .node.sel path, svg .node.sel ellipse { fill:#fde68a !important; }
+  /* selected line's content: bold, dark red text on a yellow badge */
+  svg g.hl .edgeLabel, svg g.hl .edgeLabel *, svg g.hl span, svg g.hl p, svg g.hl div, svg g.hl.edgeLabel .label * {
+    background:#fde047 !important; background-color:#fde047 !important; color:#9f1239 !important; font-weight:700 !important; opacity:1 !important; }
+  svg g.hl foreignObject div { border-radius:4px; padding:2px 6px; box-shadow:0 0 0 2px #e11d48; font-size:15px !important; }
+  svg .edgeLabels g.hl rect { fill:#fde047 !important; stroke:#e11d48 !important; stroke-width:2px; }
+</style>
+</head>
+<body>
+<main>
+<h1>ERP &amp; CRM Platform: Data Flow Diagrams</h1>
+<p class="sub">Derived from the Gap Analysis Report (18 Nov 2026), target architecture §7 and §9: Platform Core + independent business modules + Industry Packs.</p>
+
+<p class="hint">Click any box to highlight everything flowing into and out of it. Click empty space to reset. In Level 1, use the buttons to trace a whole business flow.</p>
+
+<h2>Level 0: Context diagram</h2>
+<p class="sub">The platform as one process, with the external parties it exchanges data with.</p>
+<div class="card" id="c0">
+<pre class="mermaid">
+flowchart LR
+  CUST([Customer / Prospect])
+  LEAD([Lead sources<br/>Web, Meta, WhatsApp])
+  STAFF([Sales &amp; Office Staff])
+  TECH([Technician / Field Staff])
+  EMP([Employee])
+  SUP([Supplier / Vendor])
+  PART([Partner / Dealer])
+  ADM([Tenant Admin])
+  BANK([Bank / Payment Gateway])
+  TAX([Tax Authority<br/>GST, TDS via Localisation Pack])
+  EXT([Tally / Zoho / Third-party apps])
+
+  SYS(("ERP &amp; CRM Platform<br/>Platform Core + Modules<br/>+ Industry Packs"))
+
+  LEAD -->|enquiries, form data| SYS
+  CUST -->|enquiry, approval, payment, service request| SYS
+  SYS -->|quotation, invoice, receipt, notifications| CUST
+  STAFF -->|leads, orders, follow-ups, tasks| SYS
+  SYS -->|dashboards, reports, alerts| STAFF
+  TECH -->|job updates, location, consumption, expenses| SYS
+  SYS -->|job assignments, schedules| TECH
+  EMP -->|attendance, leave requests, claims| SYS
+  SYS -->|payslips, approvals| EMP
+  SUP -->|quotes, delivery, bills| SYS
+  SYS -->|RFQ, purchase orders, payments| SUP
+  PART -->|referrals, settlement claims| SYS
+  SYS -->|commission statements| PART
+  ADM -->|config: modules, roles, pipelines, fields, packs| SYS
+  SYS -->|audit, usage, entitlements| ADM
+  BANK -->|payment status, bank statements| SYS
+  SYS -->|payment requests, payroll bank file| BANK
+  SYS -->|GST/TDS returns, e-invoice data| TAX
+  SYS -->|journals, webhooks, API events| EXT
+  EXT -->|API calls, imports| SYS
+</pre>
+</div>
+
+<h2>Level 1: Platform decomposition</h2>
+<p class="sub">Rounded boxes are processes, cylinders are data stores. Dashed arrows are published events on the event bus; consumers are optional, so a missing module simply ignores the event. Only the shared kernel (Party, Catalogue) is read directly across modules.</p>
+<div class="bar" id="flows">
+  <button data-flow="l2q">Lead to quote</button>
+  <button data-flow="q2c">Quote to cash</button>
+  <button data-flow="fin">Financial posting</button>
+  <button data-flow="p2p">Procure to pay</button>
+  <button data-flow="h2p">Hire to pay</button>
+  <button data-flow="s2s">Sale to service</button>
+  <button data-flow="cfg">Configuration</button>
+  <button data-flow="">Reset</button>
+</div>
+<div class="card" id="c1">
+<pre class="mermaid">
+flowchart TB
+  CUST([Customer])
+  LEAD([Lead sources])
+  STAFF([Staff])
+  TECH([Technician])
+  EMP([Employee])
+  SUP([Supplier])
+  ADM([Tenant Admin])
+  BANK([Bank / Gateway])
+  TAX([Tax Authority])
+
+  subgraph CORE["Platform Core"]
+    direction TB
+    P1("1.0 Tenant, Identity &amp;<br/>Module Manager")
+    P2("2.0 Metadata &amp; Workflow Engine<br/>fields, pipelines, rules, approvals, SLA")
+    P3("3.0 Notification &amp; Documents")
+    P4("4.0 Reporting &amp; Dashboards")
+    BUS{{"Event Bus (outbox)"}}
+  end
+
+  subgraph KERNEL["Shared Kernel"]
+    D1[("D1 Party / Contacts")]
+    D2[("D2 Catalogue / Tax / Currency / UOM")]
+  end
+
+  subgraph BIZ["Business Modules (each independently enable-able)"]
+    direction TB
+    P5("5.0 CRM &amp; Tasks<br/>leads, pipelines, follow-ups, quotes, targets")
+    P6("6.0 Sales &amp; Invoicing<br/>orders, delivery, invoices, payments")
+    P7("7.0 Finance<br/>ledger, AR/AP, simple books")
+    P8("8.0 HR &amp; Payroll<br/>employee, attendance, leave, payroll run")
+    P9("9.0 Inventory &amp; Purchase<br/>stock, serial/batch, RFQ, PO, GRN")
+    P10("10.0 Helpdesk, Projects,<br/>Assets &amp; Field Service")
+  end
+
+  subgraph STORES["Module data stores"]
+    D3[("D3 Leads / Deals / Quotes")]
+    D4[("D4 Orders / Invoices / Payments")]
+    D5[("D5 Ledger / Journals")]
+    D6[("D6 Employee / Attendance / Payroll")]
+    D7[("D7 Stock / PO / Bills")]
+    D8[("D8 Tickets / Assets / AMC / Projects")]
+    D9[("D9 Config, Packs &amp; Entitlements")]
+    D10[("D10 Audit &amp; Activity Log")]
+  end
+
+  ADM -->|modules, roles, packs, rules| P1
+  P1 <-->|"tenant, module, entitlement settings"| D9
+  P2 <-->|"fields, pipelines, workflow rules"| D9
+  P1 -->|permissions, module state| BIZ
+
+  LEAD -->|enquiry via connector| P5
+  CUST -->|enquiry, approval| P5
+  STAFF -->|leads, follow-ups| P5
+  P5 <-->|"leads, deals, quotes"| D3
+  P5 <-->|"customer / contact"| D1
+  P5 -->|"products, prices"| D2
+  P5 -->|quotation PDF, reminders| P3
+  P3 -->|messages, documents| CUST
+
+  P5 -.->|lead.won / quote.accepted| BUS
+  BUS -.->|"lead / quote events"| P6
+  P6 <-->|"orders, invoices, payments"| D4
+  P6 <-->|"billing details"| D1
+  P6 <-->|"items, tax, price"| D2
+  CUST -->|payment| P6
+  P6 -->|invoice, receipt| CUST
+  BANK -->|payment status| P6
+
+  P6 -.->|invoice.issued / payment.received| BUS
+  P9 -.->|stock.low / goods.received| BUS
+  P8 -.->|payroll.approved| BUS
+  BUS -.->|financial events via posting adapter| P7
+  P7 <-->|"journals, AR / AP"| D5
+  P7 -->|GST / TDS data| TAX
+  P7 -->|payment requests| BANK
+
+  EMP -->|attendance, leave, claims| P8
+  P8 <-->|"employee, attendance, payroll"| D6
+  P8 -->|payslips| EMP
+  P8 -->|payroll bank file| BANK
+
+  P6 -.->|order.short_of_stock| BUS
+  BUS -.->|"stock shortfall events"| P9
+  P9 <-->|"stock, PO, bills"| D7
+  P9 <-->|"item master"| D2
+  P9 -->|RFQ, PO| SUP
+  SUP -->|quote, delivery, bill| P9
+
+  P6 -.->|order.confirmed| BUS
+  BUS -.->|"order events"| P10
+  P10 <-->|"tickets, assets, AMC, projects"| D8
+  P10 -->|consumption, job cost| P9
+  CUST -->|service request| P10
+  TECH -->|job updates, location| P10
+  P10 -->|assignments| TECH
+
+  P2 -.->|rules fire on events| BUS
+  BIZ -->|every write| D10
+  D3 -->|"leads, deals, quotes"| P4
+  D4 -->|"orders, invoices, payments"| P4
+  D5 -->|"ledger, journals"| P4
+  D6 -->|"payroll, attendance"| P4
+  D7 -->|"stock, purchases"| P4
+  D8 -->|"tickets, jobs, AMC"| P4
+  P4 -->|dashboards, reports| STAFF
+</pre>
+</div>
+
+<h2>Key data flows</h2>
+<div class="card">
+<table>
+<thead><tr><th>Flow</th><th>From → To</th><th>Data</th><th>Report ref</th></tr></thead>
+<tbody>
+<tr><td>Lead to quote</td><td>Lead sources / Staff → CRM</td><td>Enquiry, site survey, versioned quotation, approval, e-accept</td><td>§3, C2, C5, C9</td></tr>
+<tr><td>Quote to cash</td><td>CRM → Sales → Invoicing → Customer</td><td>Order, delivery, GST-capable invoice, payment; Invoicing works even if Finance is off</td><td>§4.3, Q7</td></tr>
+<tr><td>Financial posting</td><td>Invoicing / Purchase / Payroll → Event bus → Finance</td><td>Posting events turned into journals by an adapter; no event means no coupling</td><td>AR3, §9.3</td></tr>
+<tr><td>Procure to pay</td><td>Sales / Inventory → Purchase → Supplier</td><td>Stock shortfall, RFQ, PO, GRN, 3-way-match bill, payment</td><td>§4.3</td></tr>
+<tr><td>Hire to pay</td><td>Employee → HR → Payroll → Bank</td><td>Attendance, leave, salary structure, payroll run, payslip, payment status</td><td>§4.2, R1</td></tr>
+<tr><td>Sale to service</td><td>Sales → Assets → Helpdesk → Field Service</td><td>Serial-tracked asset, warranty/AMC, ticket, dispatch, job completion</td><td>§4.3, R5</td></tr>
+<tr><td>Configuration</td><td>Tenant Admin → Core</td><td>Module toggles, roles, pipelines, custom fields, workflows, Industry/Localisation packs</td><td>§9.4</td></tr>
+<tr><td>Audit</td><td>All modules → Audit log</td><td>Field-level change log with retention</td><td>§6</td></tr>
+</tbody>
+</table>
+</div>
+</main>
+
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs";
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  mermaid.initialize({ startOnLoad: false, theme: dark ? "dark" : "default", flowchart: { useMaxWidth: false, htmlLabels: true } });
+  // Authoritative edge list parsed from the diagram source (before Mermaid replaces it)
+  const SRC = {};
+  document.querySelectorAll(".card[id]").forEach(c => {
+    const list = [], seen = {};
+    c.querySelector(".mermaid").textContent.split(String.fromCharCode(10)).forEach(line => {
+      const m = line.match(/^\s*(\w+)\s*(?:<-->|-->|-\.->)\s*(?:\|\s*"?([^|]*?)"?\s*\|)?\s*(\w+)\s*$/);
+      if (!m) return;
+      const key = m[1] + "-" + m[3];
+      const n = seen[key] = (seen[key] ?? -1) + 1;
+      list.push({ id: `L-${m[1]}-${m[3]}-${n}`, s: m[1], t: m[3], txt: (m[2] || "").trim() });
+    });
+    SRC[c.id] = list;
+  });
+  await mermaid.run({ querySelector: ".mermaid" });
+
+  // Named end-to-end flows for Level 1 (node ids from the diagram source)
+  const FLOWS = {
+    l2q: ["LEAD","CUST","STAFF","P5","D3","D1","D2","P3"],
+    q2c: ["P5","BUS","P6","D4","D1","D2","CUST","BANK"],
+    fin: ["P6","P9","P8","BUS","P7","D5","TAX","BANK"],
+    p2p: ["P6","BUS","P9","D7","D2","SUP"],
+    h2p: ["EMP","P8","D6","BANK","BUS","P7"],
+    s2s: ["P6","BUS","P10","D8","P9","CUST","TECH"],
+    cfg: ["ADM","P1","P2","D9","BIZ"]
+  };
+
+  // Purpose of each flow, keyed by edge label (or "SRC>DST" for unlabelled edges)
+  const PURPOSE = {
+    // Level 0
+    "enquiries, form data": "Captures new demand automatically so no lead is typed in by hand or lost.",
+    "enquiry, approval, payment, service request": "Customer actions that drive the sale: ask for a quote, approve it, pay, and request after-sales service.",
+    "quotation, invoice, receipt, notifications": "Keeps the customer informed and gives them the commercial documents at each step.",
+    "leads, orders, follow-ups, tasks": "Staff record the day-to-day sales and office work that moves deals forward.",
+    "dashboards, reports, alerts": "Gives staff visibility of pipeline, performance and exceptions that need action.",
+    "job updates, location, consumption, expenses": "Field data used for dispatch tracking, job costing, stock deduction and expense claims.",
+    "job assignments, schedules": "Tells technicians which jobs to do, where and when.",
+    "attendance, leave requests, claims": "Employee inputs that feed attendance, leave balances and payroll.",
+    "payslips, approvals": "Returns salary results and leave/claim decisions to the employee.",
+    "quotes, delivery, bills": "Supplier responses used for price comparison, goods receipt and the 3-way match.",
+    "RFQ, purchase orders, payments": "Requests and commits to buy, then pays the supplier.",
+    "referrals, settlement claims": "Partner or dealer leads and payout claims, so commission can be calculated.",
+    "commission statements": "Shows partners what they earned and what is settled.",
+    "config: modules, roles, pipelines, fields, packs": "Lets the business shape the platform without developers: switch modules on or off, define roles, pipelines, fields and install packs.",
+    "audit, usage, entitlements": "Gives admins accountability (who changed what) and plan/seat usage.",
+    "payment status, bank statements": "Confirms what was paid so receivables and bank reconciliation stay accurate.",
+    "payment requests, payroll bank file": "Instructs the bank to pay suppliers and salaries.",
+    "GST/TDS returns, e-invoice data": "Statutory filing, supplied through the Localisation Pack (India first).",
+    "journals, webhooks, API events": "Pushes data to Tally, Zoho or other apps so the platform can plug into existing tools.",
+    "API calls, imports": "Lets outside systems and bulk imports create or update records.",
+    // Level 1 labelled
+    "modules, roles, packs, rules": "Admin configuration stored centrally and applied to every module.",
+    "permissions, module state": "Tells each module which users may do what, and whether the module is enabled. A disabled module stops listening and hides its UI.",
+    "enquiry via connector": "Lead-capture connector maps web, Meta or WhatsApp enquiries into leads.",
+    "enquiry, approval": "Customer asks for a quote and later approves it (OTP or e-accept).",
+    "leads, follow-ups": "Staff create leads and schedule follow-ups so every enquiry has a next step.",
+    "quotation PDF, reminders": "Sends the generated quotation and follow-up reminders through the notification service.",
+    "messages, documents": "Delivers email, SMS or WhatsApp messages and documents to the customer.",
+    "lead.won / quote.accepted": "Event announcing a deal is won; Sales can turn it into an order. CRM does not know who listens.",
+    "payment": "Customer payment against an invoice or milestone.",
+    "invoice, receipt": "Tax invoice and payment receipt issued to the customer.",
+    "payment status": "Bank or gateway confirmation used to mark invoices paid.",
+    "invoice.issued / payment.received": "Event so Finance can post journals. If Finance is off, nobody posts and nothing breaks.",
+    "stock.low / goods.received": "Event so Finance or alerts can react to stock changes.",
+    "payroll.approved": "Event so Finance can book salary expense and payables.",
+    "financial events via posting adapter": "Finance's only way of learning about money events, keeping it decoupled from other modules.",
+    "GST / TDS data": "Tax data prepared for statutory returns and e-invoicing.",
+    "payment requests": "Payments to suppliers and partners sent to the bank.",
+    "attendance, leave, claims": "Employee inputs that drive attendance, leave balances and pay.",
+    "payslips": "Salary statement returned to the employee.",
+    "payroll bank file": "Bulk salary payment file for the bank.",
+    "order.short_of_stock": "Event so Purchase can raise a request when an order cannot be fulfilled from stock.",
+    "RFQ, PO": "Requests for quotation and purchase orders sent to suppliers.",
+    "quote, delivery, bill": "Supplier replies, goods delivered and bills to match against the PO and receipt.",
+    "order.confirmed": "Event so Projects, Assets and Field Service can schedule installation and set up warranty/AMC.",
+    "consumption, job cost": "Material used on a job is deducted from stock and added to job cost.",
+    "service request": "Customer raises a ticket for repair, AMC or warranty service.",
+    "job updates, location": "Technician progress and live position for dispatch and customer tracking.",
+    "assignments": "Dispatch sends jobs to the matched technician.",
+    "rules fire on events": "The workflow engine watches events and runs rules (notify, assign, approve, SLA timers).",
+    "dashboards, reports": "KPIs and reports for staff, built from read models registered by each module.",
+    // Level 1 unlabelled
+    "P1>D9": "Stores tenant, module and entitlement settings.",
+    "P2>D9": "Stores custom fields, pipelines, workflows and approval rules.",
+    "P5>D3": "Reads and writes leads, deals and quotations.",
+    "P5>D1": "Looks up and creates the customer or contact (shared Party record).",
+    "P5>D2": "Reads products and prices to build quotations.",
+    "P6>D4": "Reads and writes orders, invoices and payments.",
+    "P6>D1": "Uses the shared customer record for billing details.",
+    "P6>D2": "Reads items, tax and price for order and invoice lines.",
+    "P7>D5": "Posts and reads journals, ledgers, receivables and payables.",
+    "P8>D6": "Reads and writes employee records, attendance and payroll runs.",
+    "P9>D7": "Reads and writes stock, purchase orders and supplier bills.",
+    "P9>D2": "Shares the single product and service catalogue.",
+    "P10>D8": "Reads and writes tickets, assets, AMC contracts and projects.",
+    "BUS>P6": "Delivers events such as lead.won to Sales. Optional: ignored if Sales is off.",
+    "BUS>P9": "Delivers stock-shortage events to Purchase. Optional consumer.",
+    "BUS>P10": "Delivers order events to Projects, Assets and Field Service. Optional consumer.",
+    "BIZ>D10": "Every write by every module is logged for audit, with field-level change history."
+  };
+  for (const k of ["D3","D4","D5","D6","D7","D8"]) PURPOSE["D3>P4".replace("D3", k)] = "Read data from this store feeds the reporting engine.";
+
+  function setup(card) {
+    const svg = card.querySelector("svg");
+    if (!svg) return;
+    const nodes = {};
+    svg.querySelectorAll("g.node").forEach(g => {
+      const m = g.id.match(/^flowchart-(.+)-\d+$/);
+      if (m) nodes[m[1]] = g;
+    });
+    const paths = [...svg.querySelectorAll(".edgePaths path")];
+    // one direct child <g> per edge; ".edgeLabel" alone also matches nested elements, so use direct children
+    const labels = [...svg.querySelectorAll(".edgeLabels > g")];
+    // Mermaid may name edge ids L-A-B-0 or L_A_B_0 depending on version: normalise both
+    const norm = id => (id || "").replace(/^L[-_]/, "").replace(/_/g, "-");
+    const byId = {}; paths.forEach((p, i) => { byId[norm(p.id)] = i; });
+    const edges = SRC[card.id].map((d, k) => {
+      let i = byId[norm(d.id)];
+      if (i === undefined && paths.length === SRC[card.id].length) i = k; // fall back to drawing order
+      const p = paths[i];
+      const l = labels.find(g => { const x = g.dataset.id ? g : g.querySelector("[data-id]"); return x && norm(x.dataset.id) === norm(d.id); }) || labels[i];
+      return { p, l, s: d.s, t: d.t, txt: d.txt };
+    }).filter(e => e.p);
+    console.log("[DFD]", card.id, "edges matched", edges.length, "of", SRC[card.id].length, "sample id:", paths[0] && paths[0].id);
+    const nm = id => nodes[id] ? (nodes[id].textContent.trim().replace(/\s+/g, " ") || id) : id;
+    const panel = document.createElement("div");
+    panel.className = "panel";
+    panel.innerHTML = '<span class="hint">Select a box to see its flows.</span>';
+    card.after(panel);
+
+    const everything = () => [...Object.values(nodes), ...paths, ...labels];
+    function reset() {
+      everything().forEach(e => e && e.classList.remove("dim","hl","sel"));
+      card.parentElement.querySelectorAll("#flows button").forEach(b => b.classList.remove("on"));
+      panel.innerHTML = '<span class="hint">Select a box to see its flows.</span>';
+    }
+    function show(nodeSet, edgeSet, selId, html) {
+      everything().forEach(e => e && e.classList.add("dim"));
+      nodeSet.forEach(id => { const n = nodes[id]; if (n) { n.classList.remove("dim"); n.classList.add("hl"); } });
+      edgeSet.forEach(e => { [e.p, e.l].forEach(x => x && (x.classList.remove("dim"), x.classList.add("hl"))); });
+      if (selId && nodes[selId]) nodes[selId].classList.add("sel");
+      panel.innerHTML = html;
+    }
+    function selectNode(id) {
+      reset();
+      const es = edges.filter(e => e.s === id || e.t === id);
+      const set = new Set([id]); es.forEach(e => { set.add(e.s); set.add(e.t); });
+      const li = (e, dir) => `<li>${dir === "in" ? nm(e.s) + " → this" : "this → " + nm(e.t)}${e.txt ? ": <i>" + e.txt + "</i>" : ""}<br><span class="hint">${PURPOSE[e.txt] || PURPOSE[e.s + ">" + e.t] || ""}</span></li>`;
+      const ins = es.filter(e => e.t === id), outs = es.filter(e => e.s === id);
+      show(set, es, id,
+        `<b>${nm(id)}</b><br>Receives:<ul>${ins.map(e => li(e,"in")).join("") || "<li>none</li>"}</ul>Sends:<ul>${outs.map(e => li(e,"out")).join("") || "<li>none</li>"}</ul>`);
+    }
+    function selectEdge(e) {
+      reset();
+      const purpose = PURPOSE[e.txt] || PURPOSE[e.s + ">" + e.t] || "Data exchange between these two parts.";
+      show([e.s, e.t], [e], null,
+        `<b>${nm(e.s)} → ${nm(e.t)}</b><br>${e.txt ? "Data: <i>" + e.txt + "</i><br>" : ""}<b>Purpose:</b> ${purpose}`);
+    }
+    edges.forEach(e => {
+      // wide transparent twin so thin lines are easy to click
+      const hit = e.p.cloneNode();
+      hit.removeAttribute("id"); hit.removeAttribute("marker-end"); hit.removeAttribute("marker-start");
+      hit.setAttribute("class", "hit");
+      hit.style.cssText = "stroke:transparent;stroke-width:16px;fill:none;pointer-events:stroke;cursor:pointer";
+      e.p.after(hit);
+      const go = ev => { ev.stopPropagation(); selectEdge(e); };
+      hit.addEventListener("click", go);
+      if (e.l) { e.l.style.cursor = "pointer"; e.l.addEventListener("click", go); }
+    });
+    Object.entries(nodes).forEach(([id, g]) => g.addEventListener("click", ev => { ev.stopPropagation(); selectNode(id); }));
+    svg.addEventListener("click", reset);
+
+    if (card.id === "c1") {
+      document.querySelectorAll("#flows button").forEach(b => b.addEventListener("click", () => {
+        const key = b.dataset.flow;
+        reset();
+        if (!key) return;
+        b.classList.add("on");
+        const set = new Set(FLOWS[key]);
+        const es = edges.filter(e => set.has(e.s) && set.has(e.t));
+        show(set, es, null, `<b>${b.textContent}</b>: ${es.length} flows highlighted. Click a box for detail.`);
+        b.classList.add("on");
+      }));
+    }
+  }
+  document.querySelectorAll(".card[id]").forEach(setup);
+</script>
+</body>
+</html>
